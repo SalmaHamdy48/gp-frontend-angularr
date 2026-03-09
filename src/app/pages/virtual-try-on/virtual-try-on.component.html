@@ -1,0 +1,132 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="left-menu">
+
+        <!-- Logo -->
+        <div class="logo">FitFusion ✨</div>
+
+        <!-- Tabs -->
+        <div class="nav-links">
+        <a routerLink="/vto" routerLinkActive="active-tab" class="tab-btn">Virtual Try-On</a>
+        <a routerLink="/recommendations" routerLinkActive="active-tab" class="tab-btn">Recommendations</a>
+        </div>
+    </div>
+
+    <!-- Right Side -->
+    <div class="right-menu">
+
+      <div class="profile" routerLink="/profile">
+        <img src="assets/icons/User.png" class="icon">
+        <span>Profile</span>
+      </div>
+
+      <div class="signout">
+        <img src="assets/icons/LogOut.png" class="icon">
+        <span>Sign Out</span>
+      </div>
+
+    </div>
+
+  </div>
+</nav>
+
+<div class="container">
+
+  <h1>Virtual Try-On 👗✨</h1>
+  <p class="subtitle">
+    See how clothes look on you with AI-powered visualization 💕
+  </p>
+
+  <div class="tabs-container">
+  <button 
+    [class.active]="activeTab === 'upload'"
+    (click)="activeTab='upload'">
+    Upload Your Photo
+  </button>
+
+  <button
+    [class.active]="activeTab === 'profile'"
+    (click)="activeTab='profile'">
+    Use Profile Picture
+  </button>
+</div>
+
+
+  <!-- Upload Card -->
+<div class="upload-card">
+
+  <!-- Tab: Upload Your Photo -->
+  <div *ngIf="activeTab === 'upload'">
+    <p class="Use-header">Upload Images</p>
+    <p class="des">Upload a photo of yourself and the clothing item you want to try on</p>
+  </div>
+
+  <!-- Tab: Use Profile Picture -->
+  <div *ngIf="activeTab === 'profile'">
+    <p class="Use-header">Use Profile Picture</p>
+    <p class="des">We will use your profile picture. Just upload the clothing item below.</p>
+  </div>
+
+  <!-- Profile Picture Upload (appears in both tabs) -->
+  <div class="upload-box">
+    <p class="upload-text">Your Profile Picture</p>
+    <div class="drop-area" (click)="profileInput.click()">
+      <ng-container *ngIf="profilePreview; else noProfile">
+        <img [src]="profilePreview" class="preview">
+      </ng-container>
+      <ng-template #noProfile>
+        <p>No profile picture found</p>
+        <button class="upload-btn" (click)="profileInput.click()">Upload Profile</button>
+      </ng-template>
+      <input type="file" hidden #profileInput accept="image/*" (change)="onProfileUpload($event)">
+    </div>
+  </div>
+
+  <!-- Clothing Item Upload (appears in both tabs) -->
+  <div class="upload-box">
+    <p class="upload-text">Clothing Item</p>
+    <div class="drop-area" (click)="itemInput.click()">
+      <ng-container *ngIf="itemPreview; else noItem">
+        <img [src]="itemPreview" class="preview">
+      </ng-container>
+      <ng-template #noItem>
+        <img src="assets/icons/Upload.png" class="upload-icon">
+        <p>Click to upload clothing image</p>
+      </ng-template>
+      <input type="file" hidden #itemInput accept="image/*" (change)="onItemUpload($event)">
+    </div>
+  </div>
+
+</div>
+  
+
+
+
+  <button class="try-btn" [disabled]="!profilePreview || !itemPreview" (click)="tryItOn()">
+  Try It On
+</button>
+
+<!-- Result Card -->
+<div class="result-card" *ngIf="showResult">
+  <p class="result-title">Virtual Try-On Result ✨</p>
+  <p class="result-des">Here's how the outfit looks on you!</p>
+  
+  <div class="result-images">
+    <div class="your-photo">
+      <p>Your Photo</p>
+      <img [src]="profilePreview" class="preview">
+    </div>
+
+    <div class="with-item">
+      <p>With Clothing Item</p>
+      <div class="overlay">
+        <img [src]="itemPreview" class="preview small-item">
+        <p class="pending-text">AI Model Integration Pending</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="try-btn-footer" (click)="showResult=false">Try Another Outfit</button>
+</div>
+
+</div>
