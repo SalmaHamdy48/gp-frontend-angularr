@@ -51,13 +51,13 @@
         My Closet
       </button>
 
-      <button
+      <!-- <button
         class="tab"
         [class.active]="activeTab === 'favorites'"
         (click)="setActiveTab('favorites')"
       >
         Favorite Outfits
-      </button>
+      </button> -->
     </div>
 
     <!-- PROFILE INFO CONTENT -->
@@ -72,12 +72,24 @@
         <div class="photo-upload">
           <img src="assets/Icons/UserCircle@2x.png" class="avatar" />
 
-          <div class="upload-controls">
+          <!-- <div class="upload-controls">
+            <div>
+            <img src="assets\Icons\Upload@2x.png" class="Upload">
             <button class="upload-btn">Upload Photo</button>
-
-            <span>This photo will be used for virtual try-on</span>
+            </div>
+            <span class="upload-text">This photo will be used for virtual try-on</span>
           </div>
-        </div>
+        </div> -->
+
+        <div class="upload-controls">
+  <button class="upload-btn">
+    <img src="assets/Icons/Upload@2x.png" class="upload-icon">
+    Upload Photo
+  </button>
+
+  <span>This photo will be used for virtual try-on</span>
+</div>
+</div>
 
         <!-- USER INFO -->
         <div class="info-fields">
@@ -98,8 +110,8 @@
     <div *ngIf="activeTab === 'closet'" class="empty-section">Nothing yet</div>
 
     <!-- FAVORITE OUTFITS -->
-    <div *ngIf="activeTab === 'favorites'" class="empty-section">
+    <!-- <div *ngIf="activeTab === 'favorites'" class="empty-section">
       Nothing yet
-    </div>
+    </div> -->
   </main>
 </div>
