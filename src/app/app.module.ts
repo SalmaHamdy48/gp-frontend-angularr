@@ -28,12 +28,16 @@ import { SignupComponent } from './features/auth/pages/signup/signup.component';
 import { AuthModule } from './features/auth/auth.module';
 import { ProfileComponent } from "./features/auth/pages/profile/profile.component";
 import { LoginComponent } from './features/auth/pages/login/login.component';
+import { HomeComponent } from './home/home.component';
+import { VirtualTryOnComponent } from './pages/virtual-try-on/virtual-try-on.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     // LoginComponent,
     // SignupComponent
+    HomeComponent,
+    VirtualTryOnComponent
   ],
   imports: [
     BrowserModule,

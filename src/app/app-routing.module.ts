@@ -32,6 +32,15 @@ const routes: Routes = [
   //   { path: 'signup', component: SignupComponent },
   //   { path: '', redirectTo: '/signup', pathMatch: 'full' }
   //
+import { HomeComponent } from './home/home.component';
+import { VirtualTryOnComponent } from './pages/virtual-try-on/virtual-try-on.component';
+
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'vto', component: VirtualTryOnComponent }
+  // { path: 'recommendations', component: RecommendationsComponent },
+  // { path: 'profile', component: ProfileComponent },
+  //{ path: '', redirectTo: 'vto', pathMatch: 'full' }
 ];
 
 @NgModule({
