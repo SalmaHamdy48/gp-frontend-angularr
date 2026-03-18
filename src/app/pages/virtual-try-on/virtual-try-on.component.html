@@ -40,6 +40,40 @@
   <!-- Profile Picture Upload (appears in both tabs) -->
   <div class="upload-box">
     <p class="upload-text">Your Profile Picture</p>
+    <!-- Dropdown -->
+  <div class="item-type">
+  <p class="upload-text">Select Item Type</p>
+
+  <div class="type-options">
+    <div 
+      class="type-btn"
+      [class.active]="selectedCategory === 'dress'"
+      (click)="selectedCategory = 'dress'">
+      👗 Dress
+    </div>
+
+    <div 
+      class="type-btn"
+      [class.active]="selectedCategory === 'top'"
+      (click)="selectedCategory = 'top'">
+      👚 Top
+    </div>
+
+    <div 
+      class="type-btn"
+      [class.active]="selectedCategory === 'bottom'"
+      (click)="selectedCategory = 'bottom'">
+      👖 Bottom
+    </div>
+
+    <div 
+      class="type-btn"
+      [class.active]="selectedCategory === 'shoes'"
+      (click)="selectedCategory = 'shoes'">
+      👟 Shoes
+    </div>
+  </div>
+</div>
     <div class="drop-area" (click)="profileInput.click()">
       <ng-container *ngIf="profilePreview; else noProfile">
         <img [src]="profilePreview" class="preview">

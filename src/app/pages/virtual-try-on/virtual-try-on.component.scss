@@ -303,3 +303,38 @@ h1{
   display:block;
   margin:20px auto;
 }
+
+.item-type {
+  margin-bottom: 20px;
+}
+
+.type-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* الشكل الأساسي */
+.type-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: #FFE9F2;
+  color: #4A2C3B;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+/* hover */
+.type-btn:hover {
+  background: #ffd6e8;
+}
+
+/* لما يتختار */
+.type-btn.active {
+  background: #F5A3C7;
+  color: white;
+  border: 1px solid #F5A3C7;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

@@ -9,6 +9,7 @@ export class VirtualTryOnComponent {
   activeTab = 'upload';
   profilePreview: string | null = null;
   itemPreview: string | null = null;
+  selectedCategory: string = '';
 
   // Flag to show result card
   showResult = false;
@@ -31,9 +32,9 @@ export class VirtualTryOnComponent {
     }
   }
 
-  tryItOn() {
-    if (this.profilePreview && this.itemPreview) {
-      this.showResult = true; // يظهر كارد النتيجة
-    }
+ tryItOn() {
+  if (this.profilePreview && this.itemPreview && this.selectedCategory) {
+    this.showResult = true;
   }
+}
 }

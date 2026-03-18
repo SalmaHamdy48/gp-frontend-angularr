@@ -80,7 +80,58 @@
     </section>
 
     <!-- MY CLOSET -->
-    <div *ngIf="activeTab === 'closet'" class="empty-section">Nothing yet</div>
+    <!-- MY CLOSET CONTENT -->
+<div *ngIf="activeTab === 'closet'" class="closet-cards">
+
+  <!-- Tops Card -->
+  <div class="closet-card">
+    <h3>Tops</h3>
+    <p>Manage your top clothing items</p>
+    <button (click)="addItem('tops')">
+      <img src="assets/Icons/Upload.png" class="plus-icon">
+      <p class="add-btn">Add Top</p>
+    </button>
+    <div class="items-grid">
+      <div class="item-card" *ngFor="let top of tops">
+        <img [src]="top.imageUrl" [alt]="top.name">
+        <p>{{ top.name }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottoms Card -->
+  <div class="closet-card">
+    <h3>Bottoms</h3>
+    <p>Manage your bottom clothing items</p>
+    <button (click)="addItem('bottoms')">
+      <img src="assets/Icons/Upload.png" class="plus-icon">
+      <p class="add-btn">Add Bottom</p>
+    </button>
+    <div class="items-grid">
+      <div class="item-card" *ngFor="let bottom of bottoms">
+        <img [src]="bottom.imageUrl" [alt]="bottom.name">
+        <p>{{ bottom.name }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shoes Card -->
+  <div class="closet-card">
+    <h3>Shoes</h3>
+    <p>Manage your shoe collection</p>
+    <button (click)="addItem('shoes')">
+      <img src="assets/Icons/Upload.png" class="plus-icon">
+      <p class="add-btn">Add Shoes</p>
+    </button>
+    <div class="items-grid">
+      <div class="item-card" *ngFor="let shoe of shoes">
+        <img [src]="shoe.imageUrl" [alt]="shoe.name">
+        <p>{{ shoe.name }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
 
     <!-- FAVORITE OUTFITS -->
     <!-- <div *ngIf="activeTab === 'favorites'" class="empty-section">

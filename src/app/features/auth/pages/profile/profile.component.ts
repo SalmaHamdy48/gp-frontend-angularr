@@ -83,6 +83,9 @@ export class ProfileComponent {
   // User data
   userName = 'ABC DEF';
   userEmail = 'abc.def@example.com';
+  tops: { id: number; name: string; imageUrl: string }[] = [];
+bottoms: { id: number; name: string; imageUrl: string }[] = [];
+shoes: { id: number; name: string; imageUrl: string }[] = [];
 
   // Active tab
   // activeTab: 'profile' | 'closet' = 'profile';
@@ -110,5 +113,23 @@ export class ProfileComponent {
 
   onUploadPhoto() {
     console.log('Upload photo clicked');
+  }
+
+  addItem(collection: 'tops' | 'bottoms' | 'shoes') {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev: any) => {
+          const newItem = { id: Date.now(), name: file.name, imageUrl: ev.target.result };
+          this[collection].push(newItem);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    fileInput.click();
   }
 }
