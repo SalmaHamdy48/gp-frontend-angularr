@@ -11,7 +11,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from 'src/app/shared/services/auth/auth.service';
 import {
   FormBuilder,
   FormGroup,
@@ -32,26 +32,45 @@ export class SignupComponent implements OnInit {
     password: '',
   };
 
-  signupForm!: FormGroup;
+  signupForm!: any;
   submitted = false;
   router: any;
+  email: string = '';
+  password: string = ''
+  name: string = '';
 
-  constructor(private fb: FormBuilder) {}
-
-  ngOnInit(): void {
-    this.signupForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
+  constructor(private fb: FormBuilder, private authService: AuthService) {
+     this. signupForm = this.fb.group({
+      email : ['',  [Validators.required]],
+      password : ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,}$/)]],
+      name: ['', Validators.required]
+    })
   }
 
-  // Convenience getter for easy access to form fields
+  ngOnInit(): void {
+   
+  }
   get f() {
     return this.signupForm.controls;
   }
 
-  onSubmit() {
+   onSubmit() {
+      //const {name, email, password } = this.signupForm.value;
+      this.authService.register({ email: this.email, password: this.password , name: this.name}).subscribe({
+        next: () => {
+          this.router.navigate(['/login']);
+          console.log('Registration successful');
+        },
+        error: (err: any) => {
+          console.error('Registration error:', err);
+        }
+      });
+  }
+
+  
+ 
+
+  /*onSubmit() {
     if (
       this.signupData.name &&
       this.signupData.email &&
@@ -65,5 +84,5 @@ export class SignupComponent implements OnInit {
     } else {
       alert('Please fill all fields');
     }
-  }
+  }*/
 }

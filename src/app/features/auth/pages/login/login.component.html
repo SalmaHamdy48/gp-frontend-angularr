@@ -9,7 +9,7 @@
         <p class="card-description">Sign in to your FitFusion account</p>
       </div>
 
-      <form class="login-form" (ngSubmit)="onLogin()" #loginForm="ngForm"> 
+      <form class="login-form" (ngSubmit)="onSubmit()" #loginForm="ngForm"> 
         <div class="form-group">
           <label for="email">Email</label>
           <input 
@@ -28,12 +28,13 @@
             id="password" 
             name="password" 
             placeholder="**********" 
+
             [(ngModel)]="password"
             required 
             minlength="6">
         </div>
 
-        <button type="submit" class="signin-button" [disabled]="loginForm.invalid">Sign In</button>
+        <button type="submit" class="signin-button" [disabled]="loginForm.invalid" >Sign In</button>
       </form>
 
       <div class="card-footer">

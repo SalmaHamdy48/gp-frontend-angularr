@@ -10,6 +10,9 @@
 // }
 
 import { Component, OnInit } from '@angular/core';
+import { ProfileService } from 'src/app/shared/services/profile/profile.service';
+import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
+
 
 interface Occasion {
   id: string;
@@ -84,7 +87,7 @@ export class RecommendationComponent implements OnInit {
   editingCategory: string = '';
 
   // this.selectedCategory = type;
-  constructor() {}
+  constructor(private recommendationService: RecommendationService , private profileService: ProfileService) {}
 
   ngOnInit() {
     this.fetchCloset();
@@ -92,6 +95,7 @@ export class RecommendationComponent implements OnInit {
 
   openAddItem(category: string) {
     this.selectedCategory = category;
+    this.currentCategory = category;
     this.showAddItemModal = true;
   }
 
@@ -117,16 +121,29 @@ export class RecommendationComponent implements OnInit {
     this.closeAddItem();
   }
   fetchCloset() {
-    // call backend service
+    this.profileService.getClosetItems().subscribe(items => {
+    this.tops = items.tops || [];
+    this.bottoms = items.bottoms || [];
+    this.shoes = items.shoes || [];
+    this.isClosetEmpty = this.tops.length + this.bottoms.length + this.shoes.length === 0;
+  });
   }
 
   switchTab(tab: string): void {
     this.selectedTab = tab;
   }
 
-  setTab(tab: string) {
-    this.activeTab = tab;
+  setTab(tab: 'closet' | 'upload') {
+  this.activeTab = tab;
+
+  if (tab === 'closet') {
+    this.profileService.getClosetItems().subscribe(items => {
+      this.tops = items.tops;
+      this.bottoms = items.bottoms;
+      this.shoes = items.shoes;
+    });
   }
+}
   selectOccasion(occasion: string): void {
     this.selectedOccasion = occasion;
   }
@@ -165,12 +182,33 @@ export class RecommendationComponent implements OnInit {
   }
 
   getRecommendations(): void {
-    if (this.selectedOccasion) {
-      this.showRecommendations = true;
-      // Would call service to get AI recommendations
-      console.log('Getting recommendations for:', this.selectedOccasion);
-    }
+  if (!this.selectedOccasion) {
+    alert('Please select an occasion!');
+    return;
   }
+
+  if (this.tops.length + this.bottoms.length + this.shoes.length === 0) {
+    alert('Your closet is empty! Please add items first.');
+    return;
+  }
+
+  const data = {
+    occasion: this.selectedOccasion,
+    tops: this.tops,
+    bottoms: this.bottoms,
+    shoes: this.shoes,
+  };
+
+  this.recommendationService.createRecommendation(data).subscribe({
+    next: (res) => {
+      console.log('Recommendations:', res);
+      this.showRecommendations = true;
+    },
+    error: (err) => {
+      console.error('Error getting recommendations', err);
+    }
+  });
+}
 
   goToProfile(): void {
     // Navigate to profile to add items

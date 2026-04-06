@@ -34,9 +34,12 @@
       Select an occasion to get outfit recommendations from your saved closet
     </p>
 
-    <div class="empty">
+    <div class="empty" *ngIf="tops.length + bottoms.length + shoes.length === 0">
       <p>Your closet is empty</p>
-      <button class="pink-btn">Go to Profile to Add Items</button>
+      <button class="pink-btn" routerLink="/profile">Go to Profile to Add Items</button>
+    </div>
+      <div class="items-grid" *ngIf="tops.length + bottoms.length + shoes.length > 0">
+      <!-- هنا ممكن تحط cards للـ tops, bottoms, shoes من الـ My Closet -->
     </div>
   </div>
 
@@ -285,8 +288,8 @@
     <div class="occasion-input"></div>
     <label>Select Occasion</label>
 
-    <select title="choose an occasion">
-      <option value="" class="choose">Choose an occasion</option>
+    <select title="choose an occasion" [(ngModel)]="selectedOccasion">
+      <option value="" class="choose" >Choose an occasion</option>
       <option value="casual">Casual</option>
       <option value="business">Business/Professional</option>
       <option value="formal">Formal Event</option>
@@ -297,7 +300,7 @@
       <option value="wedding">Wedding</option>
     </select>
 
-    <button class="recommend-btn">✨ Get Recommendations</button>
+    <button class="recommend-btn" (click)="getRecommendations()">✨ Get Recommendations</button>
   </div>
 </div>
 

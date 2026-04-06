@@ -43,24 +43,23 @@
       <div class="card-content">
         <!-- AVATAR -->
         <div class="photo-upload">
-          <img src="assets/Icons/UserCircle@2x.png" class="avatar" />
-
-          <!-- <div class="upload-controls">
-            <div>
-            <img src="assets\Icons\Upload@2x.png" class="Upload">
-            <button class="upload-btn">Upload Photo</button>
-            </div>
-            <span class="upload-text">This photo will be used for virtual try-on</span>
-          </div>
-        </div> -->
+          <img [src]="profileImage ? profileImage : 'assets/Icons/UserCircle@2x.png'"
+  class="avatar" />
 
         <div class="upload-controls">
-  <button class="upload-btn">
+  <button class="upload-btn" (click)="triggerProfileUpload()">
     <img src="assets/Icons/Upload@2x.png" class="upload-icon">
     Upload Photo
   </button>
 
   <span>This photo will be used for virtual try-on</span>
+  <input
+    type="file"
+    #profileInput
+    accept="image/*"
+    hidden
+    (change)="onProfileImageSelected($event)"
+  />
 </div>
 </div>
 
@@ -88,7 +87,7 @@
     <h3>Tops</h3>
     <p>Manage your top clothing items</p>
     <button (click)="addItem('tops')">
-      <img src="assets/Icons/Upload.png" class="plus-icon">
+      <img src="assets/Icons/Upload.png" src="assets/Icons/Upload.png" class="plus-icon">
       <p class="add-btn">Add Top</p>
     </button>
     <div class="items-grid">
@@ -104,7 +103,7 @@
     <h3>Bottoms</h3>
     <p>Manage your bottom clothing items</p>
     <button (click)="addItem('bottoms')">
-      <img src="assets/Icons/Upload.png" class="plus-icon">
+      <img src="assets/Icons/Upload.png" src="assets/Icons/Upload.png" class="plus-icon">
       <p class="add-btn">Add Bottom</p>
     </button>
     <div class="items-grid">
@@ -120,7 +119,7 @@
     <h3>Shoes</h3>
     <p>Manage your shoe collection</p>
     <button (click)="addItem('shoes')">
-      <img src="assets/Icons/Upload.png" class="plus-icon">
+      <img src="assets/Icons/Upload.png" src="assets/Icons/Upload.png" class="plus-icon">
       <p class="add-btn">Add Shoes</p>
     </button>
     <div class="items-grid">
@@ -132,10 +131,5 @@
   </div>
 
 </div>
-
-    <!-- FAVORITE OUTFITS -->
-    <!-- <div *ngIf="activeTab === 'favorites'" class="empty-section">
-      Nothing yet
-    </div> -->
   </main>
 </div>
