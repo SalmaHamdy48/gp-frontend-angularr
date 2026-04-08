@@ -12,12 +12,12 @@ export class VtonService {
 
   constructor(private http: HttpClient) { }
 
-  getVtonData(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/vton`);
-  }
+ createVton(data: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}predict/post`, data);
+}
 
-  createVton(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/vton`, data);
-  }
+getVtonData(): Observable<Blob> {
+ return this.http.get(`${this.apiUrl}predict/get`, { responseType: 'blob' });
+}
 
 }

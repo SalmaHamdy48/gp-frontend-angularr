@@ -2,13 +2,18 @@
 import { Component , ViewChild ,ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
-import { ProfileService } from 'src/app/shared/services/profile/profile.service';
+import { RecommendationComponent } from 'src/app/pages/recommendation/recommendation.component';
+import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
+import { AuthService } from 'src/app/shared/services/auth/auth.service';
+
+// import { ProfileService } from 'src/app/shared/services/profile/profile.service';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
+
 export class ProfileComponent {
   // User data
   @ViewChild('profileInput') profileInput!: ElementRef<HTMLInputElement>;
@@ -18,15 +23,17 @@ export class ProfileComponent {
   tops: { id: number; name: string; imageUrl: string }[] = [];
 bottoms: { id: number; name: string; imageUrl: string }[] = [];
 shoes: { id: number; name: string; imageUrl: string }[] = [];
-
-   constructor(private profileService: ProfileService) {}
+userId: string = '';
+   constructor(private RecommendationService:RecommendationService , private AuthService :AuthService) {}
 
   activeTab: 'profile' | 'closet' | 'favorites' = 'profile';
 
   setActiveTab(tab: 'profile' | 'closet' | 'favorites') {
     this.activeTab = tab;
   }
-
+ngOnInit() {
+  this.userId = this.AuthService.currentUser?.id || '';
+}
   // Placeholder actions
   onSignOut() {
     console.log('Sign out clicked');
@@ -64,7 +71,9 @@ shoes: { id: number; name: string; imageUrl: string }[] = [];
         };
 
         // call للـ service
-        this.profileService.addClosetItem(newItem).subscribe({
+       const userId = this.userId; // لازم يكون معرف عندك (مثلاً من AuthService)
+
+    this.RecommendationService.addClosetItem(userId, file).subscribe({
           next: (res : any) => {
             console.log('Item saved on backend:', res);
             // بعد الحفظ، نضيفه محليًا عشان يظهر فورًا
@@ -83,19 +92,19 @@ triggerProfileUpload() {
   }
 
 onProfileImageSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.profileImage = e.target.result; // يتم تحديث الصورة المعروضة
-      };
-      reader.readAsDataURL(file);
-      this.profileService.uploadProfileImage(file).subscribe({
-      next: (res: any) => {
-        console.log('Profile image saved:', res);
-      },
-      error: (err: any) => console.error('Error uploading profile image', err)
-    });
+    // const file = event.target.files[0];
+    // if (file) {
+    //   const reader = new FileReader();
+    //   reader.onload = (e: any) => {
+    //     this.profileImage = e.target.result; // يتم تحديث الصورة المعروضة
+    //   };
+    //   reader.readAsDataURL(file);
+    //   // this.RecommendationService.uploadProfileImage(file).subscribe({
+    //   next: (res: any) => {
+    //     console.log('Profile image saved:', res);
+    //   },
+    //   error: (err: any) => console.error('Error uploading profile image', err)
+    // });
     }
-  }
+  
 }

@@ -14,7 +14,12 @@ export class VirtualTryOnComponent {
   profileFile!: File;
   itemFile!: File;
   resultImage: string = '';
-
+categoryMap: any = {
+  dress: 'dresses',
+  top: 'upper_body',
+  bottom: 'lower_body',
+  shoes: 'shoes'
+};
   // Flag to show result card
   showResult = false;
 
@@ -41,30 +46,49 @@ export class VirtualTryOnComponent {
   }
 
 tryItOn() {
+
   if (this.profileFile && this.itemFile && this.selectedCategory) {
 
     const formData = new FormData();
+    const backendCategory = this.categoryMap[this.selectedCategory];
 
-    formData.append('personImage', this.profileFile);
-    formData.append('clothImage', this.itemFile);
-    formData.append('category', this.selectedCategory);
+    formData.append('person_image', this.profileFile);
+    formData.append('cloth_image', this.itemFile);
+    formData.append('category', backendCategory);
 
+    // 1️⃣ إرسال الصور
     this.vtonService.createVton(formData).subscribe({
 
-      next: (res: any) => {
-        console.log(res);
+      next: () => {
 
-        this.resultImage = res.resultImage;
+        console.log("Processing started...");
 
-        // this.resultImage = 'data:image/png;base64,' + res.image;
+        // 2️⃣ نستنى شوية لأن الموديل بيشتغل في الخلفية
+        setTimeout(() => {
 
-        this.showResult = true;
+          // 3️⃣ نجيب الصورة الناتجة
+          this.vtonService.getVtonData().subscribe((blob: Blob) => {
+
+            const imageUrl = URL.createObjectURL(blob);
+
+            // الصورة الناتجة من الموديل
+            this.resultImage = imageUrl;
+
+            // اظهار النتيجة
+            this.showResult = true;
+
+          });
+
+        }, 8000); // استنى 8 ثواني (حسب سرعة الموديل)
+
       },
 
-      error: (err : any) => {
+      error: (err: any) => {
         console.error('Error:', err);
       }
+
     });
+
   }
 }
 }

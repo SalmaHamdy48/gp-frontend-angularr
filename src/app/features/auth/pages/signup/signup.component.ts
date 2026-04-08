@@ -27,7 +27,7 @@ import { CommonModule } from '@angular/common'; // for *ngIf etc.
 })
 export class SignupComponent implements OnInit {
   signupData = {
-    name: '',
+    username: '',
     email: '',
     password: '',
   };
@@ -37,13 +37,13 @@ export class SignupComponent implements OnInit {
   router: any;
   email: string = '';
   password: string = ''
-  name: string = '';
+  username: string = '';
 
   constructor(private fb: FormBuilder, private authService: AuthService) {
      this. signupForm = this.fb.group({
       email : ['',  [Validators.required]],
       password : ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,}$/)]],
-      name: ['', Validators.required]
+      username: ['', Validators.required]
     })
   }
 
@@ -56,7 +56,7 @@ export class SignupComponent implements OnInit {
 
    onSubmit() {
       //const {name, email, password } = this.signupForm.value;
-      this.authService.register({ email: this.email, password: this.password , name: this.name}).subscribe({
+      this.authService.register({ email: this.email, password: this.password , username: this.username}).subscribe({
         next: () => {
           this.router.navigate(['/login']);
           console.log('Registration successful');

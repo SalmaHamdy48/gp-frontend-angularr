@@ -10,8 +10,10 @@
 // }
 
 import { Component, OnInit } from '@angular/core';
-import { ProfileService } from 'src/app/shared/services/profile/profile.service';
+import { AuthService } from 'src/app/shared/services/auth/auth.service';
+// import { ProfileService } from 'src/app/shared/services/profile/profile.service';
 import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
+
 
 
 interface Occasion {
@@ -39,7 +41,7 @@ export class RecommendationComponent implements OnInit {
   selectedTab: string = 'use-closet';
   selectedOccasion: string = '';
   showRecommendations: boolean = false;
-
+  
   occasions: Occasion[] = [
     { id: 'casual', label: 'Casual' },
     { id: 'business', label: 'business/professional' },
@@ -85,11 +87,12 @@ export class RecommendationComponent implements OnInit {
   selectedImage: string | null = null;
   editingItem: any = null;
   editingCategory: string = '';
-
+userId: string='';
   // this.selectedCategory = type;
-  constructor(private recommendationService: RecommendationService , private profileService: ProfileService) {}
+  constructor(private recommendationService: RecommendationService , private AuthService:AuthService) {}
 
   ngOnInit() {
+    this.userId = this.AuthService.currentUser?.id || '';
     this.fetchCloset();
   }
 
@@ -121,14 +124,16 @@ export class RecommendationComponent implements OnInit {
     this.closeAddItem();
   }
   fetchCloset() {
-    this.profileService.getClosetItems().subscribe(items => {
-    this.tops = items.tops || [];
-    this.bottoms = items.bottoms || [];
-    this.shoes = items.shoes || [];
-    this.isClosetEmpty = this.tops.length + this.bottoms.length + this.shoes.length === 0;
-  });
-  }
+  this.recommendationService.getClosetItems(this.userId).subscribe(res => {
+    const items = res.items || [];
 
+    this.tops = items.filter(i => i.category === 'top');
+    this.bottoms = items.filter(i => i.category === 'bottom');
+    this.shoes = items.filter(i => i.category === 'foot');
+
+    this.isClosetEmpty = items.length === 0;
+  });
+}
   switchTab(tab: string): void {
     this.selectedTab = tab;
   }
@@ -137,75 +142,80 @@ export class RecommendationComponent implements OnInit {
   this.activeTab = tab;
 
   if (tab === 'closet') {
-    this.profileService.getClosetItems().subscribe(items => {
-      this.tops = items.tops;
-      this.bottoms = items.bottoms;
-      this.shoes = items.shoes;
-    });
+   this.fetchCloset();
   }
 }
   selectOccasion(occasion: string): void {
     this.selectedOccasion = occasion;
   }
 
-  onImageSelected(event: any, category: string) {
-    const files: FileList = event.target.files;
-    if (!files) return;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const item = {
-          name: file.name.split('.').slice(0, -1).join('.'),
-          image: reader.result as string,
-          type: '',
-          color: '',
-          gender: '',
-          season: '',
-        };
+onImageSelected(event: any, type: 'top' | 'bottom' | 'shoe') {
+  const file: File = event.target.files[0];
+  if (!file) return;
 
-        if (category === 'top') {
-          this.tops.push(item);
-        }
+  // 1️⃣ ارفعي في closet (اختياري)
+  this.recommendationService.addClosetItem(this.userId, file).subscribe({
+    next: (res) => {
+      console.log('Uploaded to closet:', res);
 
-        if (category === 'bottom') {
-          this.bottoms.push(item);
-        }
-
-        if (category === 'shoe') {
-          this.shoes.push(item);
-        }
+      const item = {
+        name: file.name,
+        image: res.url,
+        type: res.subtype || '',
+        color: res.color || '',
+        gender: res.gender || '',
+        season: res.season || '',
+        usage: res.usage || '',
       };
 
-      reader.readAsDataURL(file);
-    }
-  }
+      // UI فقط
+      if (type === 'top') this.tops.push(item);
+      else if (type === 'bottom') this.bottoms.push(item);
+      else this.shoes.push(item);
 
-  getRecommendations(): void {
-  if (!this.selectedOccasion) {
-    alert('Please select an occasion!');
-    return;
-  }
+      this.selectedImage = res.url;
 
-  if (this.tops.length + this.bottoms.length + this.shoes.length === 0) {
-    alert('Your closet is empty! Please add items first.');
-    return;
-  }
+      // 2️⃣ 👇 أهم خطوة (تضيف للـ recommendation)
+      this.recommendationService
+        .addUploadItem(this.userId, 'upload', file)
+        .subscribe({
+          next: (uploadRes) => {
+            console.log('Added to uploads (rec):', uploadRes);
+          },
+          error: (err) => {
+            console.error('Upload to rec failed', err);
+          },
+        });
+    },
 
-  const data = {
-    occasion: this.selectedOccasion,
-    tops: this.tops,
-    bottoms: this.bottoms,
-    shoes: this.shoes,
-  };
+    error: (err) => {
+      console.error('Upload error', err);
+      alert('Failed to upload image!');
+    },
+  });
+}
+recommendedOutfit: any[] = [];
+getRecommendations(): void {
+  
+    
 
-  this.recommendationService.createRecommendation(data).subscribe({
+  this.recommendationService.getOutfitRecommendation(this.userId).subscribe({
     next: (res) => {
-      console.log('Recommendations:', res);
+      console.log('Recommended outfit response:', res);
+
+      // هنا بنضيف الـ backend base URL للصور
+      const baseUrl = 'http://127.0.0.1:8000'; // ممكن كمان تاخديه من environment.apiUrl
+      this.recommendedOutfit = [
+        res.top ? { ...res.top, image: baseUrl + res.top.image_url } : null,
+        res.bottom ? { ...res.bottom, image: baseUrl + res.bottom.image_url } : null,
+        res.shoes ? { ...res.shoes, image: baseUrl + res.shoes.image_url } : null,
+      ].filter(Boolean);
+
       this.showRecommendations = true;
     },
     error: (err) => {
-      console.error('Error getting recommendations', err);
+      console.error('Error fetching recommendations', err);
+      alert('Failed to get outfit recommendations. Please try again.');
     }
   });
 }
