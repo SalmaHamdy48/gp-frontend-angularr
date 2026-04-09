@@ -6,8 +6,6 @@ import { RecommendationComponent } from 'src/app/pages/recommendation/recommenda
 import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
 
-// import { ProfileService } from 'src/app/shared/services/profile/profile.service';
-
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
@@ -33,6 +31,7 @@ userId: string = '';
   }
 ngOnInit() {
   this.userId = this.AuthService.currentUser?.id || '';
+  this.getUserData(); 
 }
   // Placeholder actions
   onSignOut() {
@@ -49,6 +48,16 @@ ngOnInit() {
     console.log('Upload photo clicked');
   }
 
+getUserData() {
+  this.AuthService.getCurrentUser().subscribe({
+    next: (res) => {
+      this.userName = res.username;
+      this.userEmail = res.email;
+    },
+    error: (err) => console.error(err)
+  });
+}
+
   addItem(collection: 'tops' | 'bottoms' | 'shoes') {
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
@@ -58,7 +67,7 @@ ngOnInit() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (ev: any) => {
-        // نجهز البيانات اللي هنبعتها للـ API
+        
         const newItem = {
           category: collection,
           name: file.name.split('.').slice(0, -1).join('.'),
@@ -70,13 +79,11 @@ ngOnInit() {
           occasion: ''
         };
 
-        // call للـ service
-       const userId = this.userId; // لازم يكون معرف عندك (مثلاً من AuthService)
+       const userId = this.userId; 
 
     this.RecommendationService.addClosetItem(userId, file).subscribe({
           next: (res : any) => {
             console.log('Item saved on backend:', res);
-            // بعد الحفظ، نضيفه محليًا عشان يظهر فورًا
             this[collection].push(res);
           },
           error: (err : any) => console.error('Error saving item', err)
@@ -88,7 +95,7 @@ ngOnInit() {
   fileInput.click();
 }
 triggerProfileUpload() {
-    this.profileInput.nativeElement.click(); // يفتح نافذة اختيار الصورة
+    this.profileInput.nativeElement.click(); 
   }
 
 onProfileImageSelected(event: any) {

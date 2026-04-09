@@ -1,13 +1,3 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-signup',
-//   templateUrl: './signup.component.html',
-//   styleUrls: ['./signup.component.scss']
-// })
-// export class SignupComponent {
-
-// }
 
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
@@ -18,7 +8,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // for *ngIf etc.
+import { CommonModule } from '@angular/common'; 
 
 @Component({
   selector: 'app-signup',
@@ -55,7 +45,6 @@ export class SignupComponent implements OnInit {
   }
 
    onSubmit() {
-      //const {name, email, password } = this.signupForm.value;
       this.authService.register({ email: this.email, password: this.password , username: this.username}).subscribe({
         next: () => {
           this.router.navigate(['/login']);
@@ -66,23 +55,4 @@ export class SignupComponent implements OnInit {
         }
       });
   }
-
-  
- 
-
-  /*onSubmit() {
-    if (
-      this.signupData.name &&
-      this.signupData.email &&
-      this.signupData.password
-    ) {
-      // You could also add more validation or an actual HTTP request here.
-      console.log('Signup successful', this.signupData);
-
-      // Redirect to the log-in page
-      this.router.navigate(['/lognin']);
-    } else {
-      alert('Please fill all fields');
-    }
-  }*/
 }

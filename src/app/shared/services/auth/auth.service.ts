@@ -27,6 +27,10 @@ export class AuthService {
     return this._currentUser.value;
   }
 
+  getCurrentUser(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}auth/me`);
+}
+
   login(credentials: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}auth/login`, credentials).pipe(
       tap(res => {

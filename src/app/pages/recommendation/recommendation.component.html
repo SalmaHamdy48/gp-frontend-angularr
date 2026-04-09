@@ -165,19 +165,22 @@
     </div>
 
     <!-- Recommended Outfit -->
-    <!-- Recommended Outfit -->
 <div class="recommendations" *ngIf="showRecommendations">
   <h3>Recommended Outfit 💖</h3>
-  <div class="outfit-items" style="display: flex; gap: 16px; flex-wrap: wrap;">
-    
-    <div class="item-card" *ngFor="let item of recommendedOutfit" style="border: 1px solid #eee; padding: 8px; border-radius: 8px; text-align: center; width: 120px;">
-      <div class="item-image" style="height: 120px; margin-bottom: 8px;">
-        <img [src]="item.image" [alt]="item.name" style="max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 4px;" />
-      </div>
-      <p class="item-name" style="font-weight: bold; font-size: 14px; margin: 4px 0;">{{ item.name }}</p>
-      <p class="item-type" style="font-size: 12px; color: #666;">{{ item.type }}</p>
-    </div>
 
+  <div class="outfit-items">
+    <div class="item-card" *ngFor="let item of recommendedOutfit">
+      
+      <div class="item-image">
+        <img [src]="item.image" [alt]="item.name" />
+      </div>
+
+      <div class="item-details">
+        <p class="item-name">{{ item.name }}</p>
+        <p class="item-type">{{ item.type }}</p>
+      </div>
+
+    </div>
   </div>
 </div>
   </div>

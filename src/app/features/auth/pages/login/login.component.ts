@@ -1,13 +1,3 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-login',
-//   templateUrl: './login.component.html',
-//   styleUrls: ['./login.component.scss']
-// })
-// export class LoginComponent {
-
-// }
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
@@ -65,9 +55,6 @@ export class LoginComponent {
   onLogin() {
     console.log('Email:', this.email);
     console.log('Password:', this.password);
-
-    // Later → connect to backend
-    // If success:
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/home']);
   }
 }

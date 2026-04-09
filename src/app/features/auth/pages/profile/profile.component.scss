@@ -1,9 +1,6 @@
-/* PAGE BACKGROUND */
 
 .profile-page {
   min-height: 100vh;
-  // background:#f8fafc;
-  // background: #ffe9f2;
 }
 
 /* NAVBAR */
@@ -11,7 +8,6 @@
 .navbar {
   width: 100%;
   background: white;
-  // background:#FFE9F2;
   border-bottom: 1px solid rgba(245, 163, 199, 0.2);
 }
 
@@ -23,7 +19,6 @@
   justify-content: space-between;
   align-items: center;
 
-  // padding-left: 10px;
 }
 
 .nav-left {
@@ -127,12 +122,6 @@
 /* PAGE TITLE */
 
 .page-title {
-  // font-size:36px;
-  // font-weight:700;
-  // background:linear-gradient(90deg,#F5A3C7,#F5A3C7);
-  // -webkit-background-clip:text;
-  // -webkit-text-fill-color:transparent;
-
   font-family: "Segoe UI Emoji";
   font-size: 36px;
   font-style: normal;
@@ -207,17 +196,14 @@ font-family: "Segoe UI Emoji";
 font-size: 14px;
 font-style: normal;
 font-weight: 400;
-line-height: 20px; /* 142.857% */
+line-height: 20px; 
 }
 
 .avatar {
   width: 120px;
-  
-  // display: flex;
-// height: 96px;
-// justify-content: center;
-// align-items: center;
-// flex: 1 0 0;
+  height: 120px; 
+  border-radius: 50%;
+  object-fit: cover; 
 }
 
 .upload-controls {

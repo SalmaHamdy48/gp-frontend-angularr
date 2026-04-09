@@ -11,8 +11,9 @@ import { VirtualTryOnComponent } from './pages/virtual-try-on/virtual-try-on.com
 import { HomePageComponent } from './pages/home-page/home-page.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'signup', component: SignupComponent },
+  {path: 'home', component: HomePageComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'login', component: LoginComponent },
   { path: 'recommendation', component: RecommendationComponent },
