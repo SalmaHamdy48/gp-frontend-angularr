@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RecommendationComponent } from 'src/app/pages/recommendation/recommendation.component';
 import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
+import { ProfileService } from 'src/app/shared/services/profile/profile.service';
 
 @Component({
   selector: 'app-profile',
@@ -16,13 +17,13 @@ export class ProfileComponent {
   // User data
   @ViewChild('profileInput') profileInput!: ElementRef<HTMLInputElement>;
   profileImage: string | null = null; 
-  userName = 'ABC DEF';
-  userEmail = 'abc.def@example.com';
+  userName = 'fatma1';
+  userEmail = 'fatma1@gmail.com';
   tops: { id: number; name: string; imageUrl: string }[] = [];
 bottoms: { id: number; name: string; imageUrl: string }[] = [];
 shoes: { id: number; name: string; imageUrl: string }[] = [];
 userId: string = '';
-   constructor(private RecommendationService:RecommendationService , private AuthService :AuthService) {}
+   constructor(private RecommendationService:RecommendationService , private AuthService :AuthService, private ProfileService: ProfileService) {}
 
   activeTab: 'profile' | 'closet' | 'favorites' = 'profile';
 
@@ -31,7 +32,20 @@ userId: string = '';
   }
 ngOnInit() {
   this.userId = this.AuthService.currentUser?.id || '';
-  this.getUserData(); 
+  this.getUserData();
+  this.loadCloset();
+  this.loadProfileImage(); // 👈 مهم
+}
+
+loadProfileImage() {
+  this.ProfileService.getProfilePhoto(this.userId).subscribe({
+    next: (res: any) => {
+      this.profileImage = res.image_url;
+    },
+    error: () => {
+      this.profileImage = null;
+    }
+  });
 }
   // Placeholder actions
   onSignOut() {
@@ -58,60 +72,69 @@ getUserData() {
   });
 }
 
-  addItem(collection: 'tops' | 'bottoms' | 'shoes') {
+addItem(collection: 'tops' | 'bottoms' | 'shoes') {
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
   fileInput.accept = 'image/*';
+
   fileInput.onchange = (e: any) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev: any) => {
-        
-        const newItem = {
-          category: collection,
-          name: file.name.split('.').slice(0, -1).join('.'),
-          image: ev.target.result, // base64 أو ممكن تستخدم FormData مع file
-          type: '',  // ممكن تعمل اختيار Type لاحق
-          color: '',
-          gender: '',
-          season: '',
-          occasion: ''
-        };
 
-       const userId = this.userId; 
+    if (!file) return;
 
-    this.RecommendationService.addClosetItem(userId, file).subscribe({
-          next: (res : any) => {
-            console.log('Item saved on backend:', res);
-            this[collection].push(res);
-          },
-          error: (err : any) => console.error('Error saving item', err)
-        });
-      };
-      reader.readAsDataURL(file);
-    }
+    this.RecommendationService.addClosetItem(this.userId, file).subscribe({
+      next: () => {
+        // 🔥 أهم خطوة: نعيد تحميل الكل من backend
+        this.loadCloset();
+      },
+      error: (err: any) => {
+        console.error('Error saving item', err);
+      }
+    });
   };
+
   fileInput.click();
 }
+loadCloset() {
+  this.RecommendationService.getClosetItems(this.userId).subscribe({
+    next: (res: any) => {
+      const items = res.items || [];
+
+      this.tops = items.map((i: any) => ({
+        id: i.public_id,
+        name: '',
+        imageUrl: i.url
+      }));
+    },
+    error: (err) => console.error(err)
+  });
+}
+
 triggerProfileUpload() {
     this.profileInput.nativeElement.click(); 
   }
-
 onProfileImageSelected(event: any) {
-    // const file = event.target.files[0];
-    // if (file) {
-    //   const reader = new FileReader();
-    //   reader.onload = (e: any) => {
-    //     this.profileImage = e.target.result; // يتم تحديث الصورة المعروضة
-    //   };
-    //   reader.readAsDataURL(file);
-    //   // this.RecommendationService.uploadProfileImage(file).subscribe({
-    //   next: (res: any) => {
-    //     console.log('Profile image saved:', res);
-    //   },
-    //   error: (err: any) => console.error('Error uploading profile image', err)
-    // });
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  // ✅ عرض الصورة فورًا (Preview)
+  const reader = new FileReader();
+  reader.onload = (e: any) => {
+    this.profileImage = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  // ✅ رفع الصورة للـ backend
+  this.ProfileService.uploadProfilePhoto(this.userId, file).subscribe({
+    next: (res: any) => {
+      console.log('Profile image saved:', res);
+
+      // 🔥 مهم: نجيب الصورة من السيرفر تاني عشان نضمن إنها نفس URL
+      this.loadProfileImage();
+    },
+    error: (err: any) => {
+      console.error('Error uploading profile image', err);
     }
-  
-}
+  });
+}}

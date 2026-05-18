@@ -35,17 +35,24 @@ export class AuthService {
   getCurrentUser(): Observable<any> {
   return this.http.get<any>(`${this.apiUrl}auth/me`);
 }
+login(credentials: any): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}auth/login`, credentials).pipe(
+    tap(res => {
+      const userData = {
+        id: res.user_id,
+        username: res.username,
+        email: res.email,
+        token: res.access_token
+      };
 
-  login(credentials: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}auth/login`, credentials).pipe(
-      tap(res => {
-        const userData = { id: res.user_id, token: res.access_token }; 
-        this._currentUser.next(userData);
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-      })
-    );
-  }
-
+      this._currentUser.next(userData);
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+    })
+  );
+}
+getUserById(userId: string): Observable<any> {
+  return this.http.get(`${this.apiUrl}/user/${userId}`);
+}
  
   register(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}auth/register`, userData);

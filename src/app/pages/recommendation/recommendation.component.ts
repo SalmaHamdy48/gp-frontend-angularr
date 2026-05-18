@@ -1,14 +1,3 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'app-recommendation',
-//   templateUrl: './recommendation.component.html',
-//   styleUrls: ['./recommendation.component.scss']
-// })
-// export class RecommendationComponent {
-
-// }
-
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/shared/services/auth/auth.service';
 // import { ProfileService } from 'src/app/shared/services/profile/profile.service';
@@ -41,6 +30,7 @@ export class RecommendationComponent implements OnInit {
   selectedTab: string = 'use-closet';
   selectedOccasion: string = '';
   showRecommendations: boolean = false;
+  loadingRecommendations = false;
   
   occasions: Occasion[] = [
     { id: 'casual', label: 'Casual' },
@@ -91,6 +81,17 @@ userId: string='';
   // this.selectedCategory = type;
   constructor(private recommendationService: RecommendationService , private AuthService:AuthService) {}
 
+  toastMessage: string = '';
+showToast: boolean = false;
+
+showError(message: string) {
+  this.toastMessage = message;
+  this.showToast = true;
+
+  setTimeout(() => {
+    this.showToast = false;
+  }, 3000);
+}
   ngOnInit() {
     this.userId = this.AuthService.currentUser?.id || '';
     this.fetchCloset();
@@ -190,15 +191,16 @@ onImageSelected(event: any, type: 'top' | 'bottom' | 'shoe') {
 
     error: (err) => {
       console.error('Upload error', err);
-      alert('Failed to upload image!');
+      this.showError('Failed to upload image!');
     },
   });
 }
 recommendedOutfit: any[] = [];
 getRecommendations(): void {
-  
-    
-
+  if (this.loadingRecommendations) return;
+  this.recommendedOutfit = [];
+  this.showRecommendations = false;
+  this.loadingRecommendations = true;
   this.recommendationService.getOutfitRecommendation(this.userId).subscribe({
     next: (res) => {
       console.log('Recommended outfit response:', res);
@@ -212,11 +214,16 @@ getRecommendations(): void {
       ].filter(Boolean);
 
       this.showRecommendations = true;
+      this.loadingRecommendations = false;
     },
     error: (err) => {
       console.error('Error fetching recommendations', err);
-      alert('Failed to get outfit recommendations. Please try again.');
-    }
+      this.loadingRecommendations = false;
+      this.showError('Failed to get outfit recommendations!');
+    },
+    complete: () => {
+  this.loadingRecommendations = false;
+}
   });
 }
 
@@ -224,14 +231,48 @@ getRecommendations(): void {
     // Navigate to profile to add items
     console.log('Navigate to profile');
   }
-  editItem(item: any, category: string) {
-    this.editingItem = item;
-    this.editingCategory = category;
-    this.newItem = { ...item }; // copy values into form
-    this.selectedImage = item.image;
-    this.showAddItemModal = true;
-  }
+ editItem(item: any, category: string) {
+  this.editingItem = item;
+  this.editingCategory = category;
 
+  this.newItem = {
+    name: item.name || '',
+
+    // ✅ أهم سطر
+    type: item.type || item.subtype || '',
+
+    color: item.color || this.mapColor(item.color_group),
+
+    gender: item.gender || '',
+
+    season: item.season || '',
+
+    // ✅ usage → occasion
+    occasion: item.occasion || item.usage || '',
+  };
+
+  this.selectedImage = item.image || item.image_url;
+
+  this.showAddItemModal = true;
+}
+mapColor(colorGroup: number): string {
+  const colors: any = {
+    1: 'Black',
+    2: 'White',
+    3: 'Red',
+    4: 'Blue',
+    5: 'Green',
+    6: 'Yellow',
+    7: 'Pink',
+    8: 'Purple',
+    9: 'Brown',
+    10: 'Gray',
+    11: 'Orange',
+    12: 'Beige', // 👈 غالبًا ده
+  };
+
+  return colors[colorGroup] || '';
+}
   closeAddItem() {
     this.showAddItemModal = false;
     this.editingItem = null;

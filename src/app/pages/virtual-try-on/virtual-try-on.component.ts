@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { VtonService } from 'src/app/shared/services/vton/vton.service';
+import { AuthService } from 'src/app/shared/services/auth/auth.service'; 
+import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
 
 @Component({
   selector: 'app-virtual-try-on',
@@ -7,7 +9,7 @@ import { VtonService } from 'src/app/shared/services/vton/vton.service';
   styleUrls: ['./virtual-try-on.component.scss']
 })
 export class VirtualTryOnComponent {
-  activeTab = 'upload';
+
   profilePreview: string | null = null;
   itemPreview: string | null = null;
   selectedCategory: string = '';
@@ -22,18 +24,65 @@ categoryMap: any = {
 };
   // Flag to show result card
   showResult = false;
+  activeTab: 'upload' | 'closet' = 'upload';
+  profileReady = false;
 
-  constructor(private vtonService: VtonService) {}
+closetItems: any[] = [];
+selectedClosetItem: any = null;
+
+userId: string = '';
+
+  constructor(private vtonService: VtonService, private authService: AuthService, private recommendationService: RecommendationService) {}
+
+ngOnInit() {
+  this.authService.getCurrentUser().subscribe(res => {
+    this.userId = res.id;
+
+    this.loadCloset(); // 👈 هنا الصح
+  });
+}
+loadCloset() {
+  if (!this.userId) return;
+
+  this.recommendationService.getClosetItems(this.userId).subscribe(res => {
+    const items = res.items || [];
+
+    this.closetItems = items.map((i: any) => ({
+      ...i,
+      image: i.url // 👈 مهم جدًا (مش image_url)
+    }));
+  });
+}
+
+selectClosetItem(item: any) {
+  this.selectedClosetItem = item;
+  this.selectedCategory = item.category;
+
+  console.log("selected item:", item);
+}
 
   onProfileUpload(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.profileFile = file; 
-      const reader = new FileReader();
-      reader.onload = () => this.profilePreview = reader.result as string;
-      reader.readAsDataURL(file);
-    }
+  const file = event.target.files[0];
+  if (file) {
+    this.profileFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.profilePreview = reader.result as string;
+      this.profileReady = true; // 👈 مهم
+    };
+
+    reader.readAsDataURL(file);
   }
+}
+
+get filteredClosetItems() {
+  if (!this.selectedCategory) return this.closetItems;
+
+  return this.closetItems.filter(
+    item => item.category === this.selectedCategory
+  );
+}
   onItemUpload(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -47,48 +96,56 @@ categoryMap: any = {
 
 tryItOn() {
 
-  if (this.profileFile && this.itemFile && this.selectedCategory) {
+  if (!this.profileFile) {
+    alert("Upload your photo first");
+    return;
+  }
 
-    const formData = new FormData();
+  const formData = new FormData();
+
+  formData.append('person_image', this.profileFile);
+
+  // ✅ Upload Mode
+  if (this.activeTab === 'upload') {
+
+    if (!this.itemFile || !this.selectedCategory) {
+      alert("Upload item first");
+      return;
+    }
+
     const backendCategory = this.categoryMap[this.selectedCategory];
 
-    formData.append('person_image', this.profileFile);
     formData.append('cloth_image', this.itemFile);
     formData.append('category', backendCategory);
-
-    // 1️⃣ إرسال الصور
-    this.vtonService.createVton(formData).subscribe({
-
-      next: () => {
-
-        console.log("Processing started...");
-
-        // 2️⃣ نستنى شوية لأن الموديل بيشتغل في الخلفية
-        setTimeout(() => {
-
-          // 3️⃣ نجيب الصورة الناتجة
-          this.vtonService.getVtonData().subscribe((blob: Blob) => {
-
-            const imageUrl = URL.createObjectURL(blob);
-
-            // الصورة الناتجة من الموديل
-            this.resultImage = imageUrl;
-
-            // اظهار النتيجة
-            this.showResult = true;
-
-          });
-
-        }, 8000); // استنى 8 ثواني (حسب سرعة الموديل)
-
-      },
-
-      error: (err: any) => {
-        console.error('Error:', err);
-      }
-
-    });
-
   }
+
+  // ✅ Closet Mode
+  else if (this.activeTab === 'closet') {
+
+    if (!this.selectedClosetItem) {
+      alert("Select item from closet");
+      return;
+    }
+
+    const backendCategory = this.categoryMap[this.selectedClosetItem.category];
+
+    formData.append('cloth_image_url', this.selectedClosetItem.image);
+    formData.append('category', backendCategory);
+  }
+
+  this.vtonService.createVton(formData).subscribe({
+    next: () => {
+
+      setTimeout(() => {
+
+        this.vtonService.getVtonData().subscribe((blob: Blob) => {
+          this.resultImage = URL.createObjectURL(blob);
+          this.showResult = true;
+        });
+
+      }, 8000);
+
+    }
+  });
 }
 }

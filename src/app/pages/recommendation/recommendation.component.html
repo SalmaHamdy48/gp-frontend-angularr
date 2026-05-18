@@ -1,8 +1,8 @@
 <div class="container">
   <div class="main-content">
-    <h1 class="outfit-recommendation">Outfit Recommendations 💖✨</h1>
+    <h1 class="outfit-recommendation">Outfit Recommendations </h1>
     <p class="subtitle">
-      Get personalized outfit suggestions for any occasion 👚👗
+      Get personalized outfit suggestions for any occasion 
     </p>
 
     <!-- Tabs -->
@@ -29,7 +29,7 @@
       <h3>Your Closet</h3>
 
       <div class="empty" *ngIf="tops.length + bottoms.length + shoes.length === 0">
-        <p>Your closet is empty</p>
+       
         <button class="pink-btn" routerLink="/profile">Go to Profile to Add Items</button>
       </div>
 
@@ -161,12 +161,22 @@
 
     <!-- Get Recommendations -->
     <div class="occasion">
-      <button class="recommend-btn" (click)="getRecommendations()">✨ Get Recommendations</button>
-    </div>
+  <button 
+    class="recommend-btn" 
+    (click)="getRecommendations()"
+    [disabled]="loadingRecommendations">
+     Get Recommendations
+  </button>
+</div>
+
+<!-- LOADING STATE -->
+<div *ngIf="loadingRecommendations" class="loading-state">
+  <p>Generating your outfit... </p>
+</div>
 
     <!-- Recommended Outfit -->
 <div class="recommendations" *ngIf="showRecommendations">
-  <h3>Recommended Outfit 💖</h3>
+  <h3>Recommended Outfit </h3>
 
   <div class="outfit-items">
     <div class="item-card" *ngFor="let item of recommendedOutfit">
@@ -189,7 +199,7 @@
   <div class="modal-overlay" *ngIf="showAddItemModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h2>Add Item Details ✨</h2>
+        <h2>Add Item Details </h2>
         <span class="close" (click)="closeAddItem()">✕</span>
       </div>
 
@@ -214,6 +224,23 @@
           <option>Jacket</option>
           <option>Tank Top</option>
           <option>Crop Top</option>
+          <option  value="Jeans">Jeans</option>
+<option  value="Trousers">Trousers</option>
+<option  value="Shorts">Shorts</option>
+<option  value="Skirt">Skirt</option>
+<option value="Leggings">Leggings</option>
+<option  value="Joggers">Joggers</option>
+<option  value="Sweatpants">Sweatpants</option>
+<option  value="Cargo Pants">Cargo Pants</option>
+          <option value="Sneakers">Sneakers</option>
+<option value="Casual Shoes">Casual Shoes</option>
+<option value="Formal Shoes">Formal Shoes</option>
+<option value="Boots">Boots</option>
+<option value="Sandals">Sandals</option>
+<option value="Heels">Heels</option>
+<option value="Flats">Flats</option>
+<option value="Running Shoes">Running Shoes</option>
+
         </select>
 
         <label>Color</label>
@@ -273,4 +300,8 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="toast" *ngIf="showToast">
+  {{ toastMessage }}
 </div>
