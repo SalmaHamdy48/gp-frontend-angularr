@@ -1,59 +1,72 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/app/enviroments/enviroment';
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
 
-  private baseUrl = environment.apiUrl;
+  apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
-  // ✅ رفع صورة
-  uploadProfilePhoto(userId: string, file: File): Observable<any> {
+  getProfilePhoto(userId: string) {
+    return this.http.get(
+      `${this.apiUrl}get-profile-photo?user_id=${userId}`
+    );
+  }
+
+  uploadProfilePhoto(userId: string, file: File) {
+
     const formData = new FormData();
+
     formData.append('user_id', userId);
     formData.append('file', file);
 
-    return this.http.post(`${this.baseUrl}upload-profile-photo`, formData);
+    return this.http.post(
+      `${this.apiUrl}upload-profile-photo`,
+      formData
+    );
   }
-getUserById(userId: string): Observable<any> {
-  return this.http.get(`${this.baseUrl}/user/${userId}`);
-}
- 
-  // ✅ جلب صورة
-  getProfilePhoto(userId: string): Observable<any> {
-    const params = new HttpParams().set('user_id', userId);
 
-    return this.http.get(`${this.baseUrl}get-profile-photo`, { params });
+  deleteProfilePhoto(userId: string) {
+    return this.http.delete(
+      `${this.apiUrl}delete-profile-photo?user_id=${userId}`
+    );
   }
-// GET closet items
-getClosetItems(userId: string): Observable<any> {
-  const params = new HttpParams().set('user_id', userId);
 
-  return this.http.get(`${this.baseUrl}closet/items`, { params });
-}
+  // =========================
+// CLOSET
+// =========================
 
-// POST closet item
-addClosetItem(userId: string, file: File): Observable<any> {
+uploadClosetItem(userId: string, file: File) {
+
   const formData = new FormData();
+
   formData.append('file', file);
 
-  const params = new HttpParams().set('user_id', userId);
-
-  return this.http.post(`${this.baseUrl}closet/items`, formData, {
-    params
-  });
+  return this.http.post(
+    `${this.apiUrl}closet/items?user_id=${userId}`,
+    formData
+  );
 }
 
-  // ✅ حذف صورة
-  deleteProfilePhoto(userId: string): Observable<any> {
-    const params = new HttpParams().set('user_id', userId);
+getClosetItems(userId: string) {
 
-    return this.http.delete(`${this.baseUrl}delete-profile-photo`, { params });
-  }
+  return this.http.get(
+    `${this.apiUrl}closet/items?user_id=${userId}`
+  );
 }
+
+deleteClosetItem(
+  userId: string,
+  publicId: string
+) {
+
+  return this.http.delete(
+    `${this.apiUrl}closet/items/${encodeURIComponent(publicId)}?user_id=${userId}`
+  );
+}
+}
+

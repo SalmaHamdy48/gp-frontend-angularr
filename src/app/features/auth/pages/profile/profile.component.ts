@@ -1,198 +1,251 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RecommendationComponent } from 'src/app/pages/recommendation/recommendation.component';
-import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
-import { AuthService } from 'src/app/shared/services/auth/auth.service';
+//import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
 import { ProfileService } from 'src/app/shared/services/profile/profile.service';
+
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+  styleUrls: ['./profile.component.scss']
 })
-export class ProfileComponent {
-  // User data
-  @ViewChild('profileInput') profileInput!: ElementRef<HTMLInputElement>;
-  profileImage: string | null = null;
-  userName = 'Amira2026';
-  userEmail = 'amira@gmail.com';
-  tops: { id: number; name: string; imageUrl: string }[] = [];
-  bottoms: { id: number; name: string; imageUrl: string }[] = [];
-  shoes: { id: number; name: string; imageUrl: string }[] = [];
-  userId: string = '';
+export class ProfileComponent implements OnInit {
+
+  imageUrl = '';
+  profileImage = '';
+
+  selectedFile!: File;
+  currentUser: any;
+
+  activeTab = 'profile';
+
+  userName = '';
+  userEmail = '';
+
+  tops: any[] = [];
+  bottoms: any[] = [];
+  shoes: any[] = [];
+
+  @ViewChild('closetInput')
+  closetInput!: ElementRef<HTMLInputElement>;
+
+  selectedClosetFile!: File;
+  selectedClosetType = '';
+
   constructor(
-    private RecommendationService: RecommendationService,
-    private AuthService: AuthService,
-    private ProfileService: ProfileService,
+    private profileService: ProfileService
   ) {}
 
-  activeTab: 'profile' | 'closet' | 'favorites' = 'profile';
+  ngOnInit(): void {
 
-  // setActiveTab(tab: 'profile' | 'closet' | 'favorites')
-  setActiveTab(tab: 'profile' | 'closet') {
+    const storedUser = localStorage.getItem('currentUser');
+
+    if (storedUser) {
+
+      this.currentUser = JSON.parse(storedUser);
+
+      this.userName = this.currentUser.username || '';
+      this.userEmail = this.currentUser.email || '';
+
+      this.loadProfilePhoto();
+      this.loadCloset();
+    }
+  }
+
+  setActiveTab(tab: string) {
     this.activeTab = tab;
   }
-  ngOnInit() {
-    this.userId = this.AuthService.currentUser?.id || '';
-    this.getUserData();
-    this.loadCloset();
-    this.loadProfileImage(); // 👈 مهم
-  }
 
-  loadProfileImage() {
-    this.ProfileService.getProfilePhoto(this.userId).subscribe({
-      next: (res: any) => {
-        this.profileImage = res.image_url;
-      },
-      error: () => {
-        this.profileImage = null;
-      },
-    });
-  }
-  // Placeholder actions
-  onSignOut() {
-    console.log('Sign out clicked');
-  }
+  loadProfilePhoto() {
 
-  onProfile() {
-    // Navigate to profile page (if not already there)
-    // Example: this.router.navigate(['/profile']);
-    console.log('Profile button clicked');
-  }
+    if (!this.currentUser?.id) {
+      return;
+    }
 
-  onUploadPhoto() {
-    console.log('Upload photo clicked');
-  }
-
-  getUserData() {
-    this.AuthService.getCurrentUser().subscribe({
-      next: (res) => {
-        this.userName = res.username;
-        this.userEmail = res.email;
-      },
-      error: (err) => console.error(err),
-    });
-  }
-
-  addItem(collection: 'tops' | 'bottoms' | 'shoes') {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      this.RecommendationService.addClosetItem(this.userId, file).subscribe({
-        next: () => {
-          // 🔥 أهم خطوة: نعيد تحميل الكل من backend
-          this.loadCloset();
+    this.profileService
+      .getProfilePhoto(this.currentUser.id)
+      .subscribe({
+        next: (res: any) => {
+          this.imageUrl = res.image_url;
+          this.profileImage = res.image_url;
         },
-        error: (err: any) => {
-          console.error('Error saving item', err);
-        },
+        error: () => {
+          this.imageUrl = '';
+          this.profileImage = '';
+        }
       });
-    };
-
-    fileInput.click();
-  }
-
-  // addItem(collection: 'tops' | 'bottoms' | 'shoes') {
-
-  // const fileInput = document.createElement('input');
-
-  // fileInput.type = 'file';
-  // fileInput.accept = 'image/*';
-
-  // fileInput.onchange = (event: any) => {
-
-  //   const file = event.target.files[0];
-
-  //   if (!file) return;
-
-  //   // ✅ CREATE LOCAL PREVIEW
-  //   const reader = new FileReader();
-
-  //   reader.onload = (e: any) => {
-
-  //     const newItem = {
-  //       id: Date.now(),
-  //       name: file.name,
-  //       imageUrl: e.target.result
-  //     };
-
-  //     // ✅ ADD DIRECTLY TO UI
-  //     if (collection === 'tops') {
-  //       this.tops.push(newItem);
-  //     }
-
-  //     else if (collection === 'bottoms') {
-  //       this.bottoms.push(newItem);
-  //     }
-
-  //     else if (collection === 'shoes') {
-  //       this.shoes.push(newItem);
-  //     }
-  //   };
-
-  //   reader.readAsDataURL(file);
-
-  //   // ✅ SEND TO BACKEND
-  //   this.RecommendationService
-  //     .addClosetItem(this.userId, file)
-  //     .subscribe({
-  //       next: (res) => {
-  //         console.log('Uploaded successfully');
-  //       },
-  //       error: (err) => {
-  //         console.error(err);
-  //       }
-  //     });
-
-  // };
-
-  // fileInput.click();
-  // }
-  loadCloset() {
-    this.RecommendationService.getClosetItems(this.userId).subscribe({
-      next: (res: any) => {
-        const items = res.items || [];
-
-        this.tops = items.map((i: any) => ({
-          id: i.public_id,
-          name: '',
-          imageUrl: i.url,
-        }));
-      },
-      error: (err) => console.error(err),
-    });
   }
 
   triggerProfileUpload() {
-    this.profileInput.nativeElement.click();
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
+    input?.click();
   }
-  onProfileImageSelected(event: any) {
-    const file = event.target.files[0];
-
-    if (!file) return;
-
-    // ✅ عرض الصورة فورًا (Preview)
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.profileImage = e.target.result;
-    };
-    reader.readAsDataURL(file);
-
-    // ✅ رفع الصورة للـ backend
-    this.ProfileService.uploadProfilePhoto(this.userId, file).subscribe({
+  uploadClosetItem() {
+  
+  this.profileService
+    .uploadClosetItem(
+      this.currentUser.id,
+      this.selectedClosetFile
+    )
+    .subscribe({
       next: (res: any) => {
-        console.log('Profile image saved:', res);
+        console.log('Upload Response:', res);
 
-        // 🔥 مهم: نجيب الصورة من السيرفر تاني عشان نضمن إنها نفس URL
-        this.loadProfileImage();
+        const item = {
+          imageUrl: res.url,
+          name: res.subtype || res.category,
+          public_id: res.public_id
+        };
+
+        const category =
+          (res.category || '').toLowerCase();
+
+        if (
+          category.includes('top')
+        ) {
+
+          this.tops.push(item);
+
+        } else if (
+          category.includes('bottom')
+        ) {
+
+          this.bottoms.push(item);
+
+        } else {
+
+          this.shoes.push(item);
+        }
+
+        alert('Item added successfully');
       },
-      error: (err: any) => {
-        console.error('Error uploading profile image', err);
-      },
+      error: (err) => {
+        console.error(err);
+        alert('Upload failed');
+      }
     });
+}
+onClosetItemSelected(event: any) {
+
+  if (!event.target.files.length) {
+    return;
   }
+
+  this.selectedClosetFile =
+    event.target.files[0];
+
+  this.uploadClosetItem();
+}
+  onProfileImageSelected(event: any) {
+
+    if (event.target.files.length > 0) {
+
+      this.selectedFile = event.target.files[0];
+
+      this.uploadPhoto();
+    }
+  }
+
+  uploadPhoto() {
+
+    if (!this.selectedFile) {
+      alert('Please select an image');
+      return;
+    }
+
+    this.profileService
+      .uploadProfilePhoto(
+        this.currentUser.id,
+        this.selectedFile
+      )
+      .subscribe({
+        next: (res: any) => {
+
+          this.imageUrl = res.url;
+          this.profileImage = res.url;
+
+          alert('Photo uploaded successfully');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Upload failed');
+        }
+      });
+  }
+
+  deletePhoto() {
+
+    this.profileService
+      .deleteProfilePhoto(this.currentUser.id)
+      .subscribe({
+        next: () => {
+
+          this.imageUrl = '';
+          this.profileImage = '';
+
+          alert('Photo deleted');
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+  }
+
+  addItem(type: string) {
+
+  this.selectedClosetType = type;
+
+  this.closetInput.nativeElement.click();
+}
+
+  loadCloset() {
+
+  this.profileService
+    .getClosetItems(this.currentUser.id)
+    .subscribe({
+      next: (res: any) => {
+
+        this.tops = [];
+        this.bottoms = [];
+        this.shoes = [];
+
+        res.items.forEach((item: any) => {
+
+          const category =
+            (item.category || '').toLowerCase();
+
+          const closetItem = {
+            imageUrl: item.url,
+            name: item.subtype || item.category,
+            public_id: item.public_id
+          };
+
+          if (category.includes('top')) {
+
+            this.tops.push(closetItem);
+
+          } else if (
+            category.includes('bottom')
+          ) {
+
+            this.bottoms.push(closetItem);
+
+          } else {
+
+            this.shoes.push(closetItem);
+          }
+        });
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+}
 }
