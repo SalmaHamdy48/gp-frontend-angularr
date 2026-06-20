@@ -21,8 +21,8 @@ export class RecommendationComponent implements OnInit {
     this.tops = this.tops.filter(i => i !== item);
   } else if (category === 'bottom') {
     this.bottoms = this.bottoms.filter(i => i !== item);
-  } else if (category === 'shoe') {
-    this.shoes = this.shoes.filter(i => i !== item);
+  } else if (category === 'bag') {
+    this.bags = this.bags.filter(i => i !== item);
   }
 }
 
@@ -46,13 +46,13 @@ export class RecommendationComponent implements OnInit {
   closet = {
     tops: [],
     bottoms: [],
-    shoes: [],
+    bags: [],
   };
 
   currentCategory: string = '';
   tops: any[] = [];
   bottoms: any[] = [];
-  shoes: any[] = [];
+  bags: any[] = [];
   currentType: string = '';
   activeTab: string = 'closet';
   // Modal
@@ -119,7 +119,7 @@ showError(message: string) {
 
       if (this.currentCategory === 'top') this.tops.push(item);
       if (this.currentCategory === 'bottom') this.bottoms.push(item);
-      if (this.currentCategory === 'shoe') this.shoes.push(item);
+      if (this.currentCategory === 'shoe') this.bags.push(item);
     }
 
     this.closeAddItem();
@@ -130,7 +130,7 @@ showError(message: string) {
 
     this.tops = items.filter(i => i.category === 'top');
     this.bottoms = items.filter(i => i.category === 'bottom');
-    this.shoes = items.filter(i => i.category === 'foot');
+    this.bags = items.filter(i => i.category === 'foot');
 
     this.isClosetEmpty = items.length === 0;
   });
@@ -172,7 +172,7 @@ onImageSelected(event: any, type: 'top' | 'bottom' | 'shoe') {
       // UI فقط
       if (type === 'top') this.tops.push(item);
       else if (type === 'bottom') this.bottoms.push(item);
-      else this.shoes.push(item);
+      else this.bags.push(item);
 
       this.selectedImage = res.url;
 
@@ -210,7 +210,7 @@ getRecommendations(): void {
       this.recommendedOutfit = [
         res.top ? { ...res.top, image: baseUrl + res.top.image_url } : null,
         res.bottom ? { ...res.bottom, image: baseUrl + res.bottom.image_url } : null,
-        res.shoes ? { ...res.shoes, image: baseUrl + res.shoes.image_url } : null,
+        res.bag ? { ...res.bag, image: baseUrl + res.bag.image_url } : null,
       ].filter(Boolean);
 
       this.showRecommendations = true;

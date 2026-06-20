@@ -1,13 +1,13 @@
 <div class="profile-page">
-  <!-- NAVBAR -->
-
-  <!-- MAIN CONTENT -->
 
   <main class="main-content">
+
+    <!-- PAGE TITLE -->
     <h1 class="page-title">My Profile</h1>
 
     <!-- TABS -->
     <div class="tabs">
+
       <button
         class="tab"
         [class.active]="activeTab === 'profile'"
@@ -24,112 +24,254 @@
         My Closet
       </button>
 
-      <!-- <button
-        class="tab"
-        [class.active]="activeTab === 'favorites'"
-        (click)="setActiveTab('favorites')"
-      >
-        Favorite Outfits
-      </button> -->
     </div>
 
-    <!-- PROFILE INFO CONTENT -->
+    <!-- =========================
+         PROFILE INFO
+    ========================== -->
+
     <section *ngIf="activeTab === 'profile'" class="card">
+
       <div class="card-header">
         <h2>Profile Information</h2>
         <p>Manage your profile picture and details</p>
       </div>
 
       <div class="card-content">
-        <!-- AVATAR -->
+
+        <!-- PHOTO -->
         <div class="photo-upload">
-          <img [src]="profileImage ? profileImage : 'assets/Icons/UserCircle@2x.png'"
-  class="avatar" />
 
-        <div class="upload-controls">
-  <button class="upload-btn" (click)="triggerProfileUpload()">
-    <img src="assets/Icons/Upload@2x.png" class="upload-icon">
-    Upload Photo
-  </button>
+          <img
+            [src]="profileImage ? profileImage : 'assets/Icons/UserCircle@2x.png'"
+            class="avatar"
+          />
 
-  <span>This photo will be used for virtual try-on</span>
-  <input
-    type="file"
-    #profileInput
-    accept="image/*"
-    hidden
-    (change)="onProfileImageSelected($event)"
-  />
-</div>
-</div>
+          <div class="upload-controls">
+
+            <button class="upload-btn" (click)="triggerProfileUpload()">
+
+              <img
+                src="assets/Icons/Upload@2x.png"
+                class="upload-icon"
+              >
+
+              Upload Photo
+
+            </button>
+
+            <span>
+              This photo will be used for virtual try-on
+            </span>
+
+            <input
+              type="file"
+              #profileInput
+              accept="image/*"
+              hidden
+              (change)="onProfileImageSelected($event)"
+            />
+
+          </div>
+
+        </div>
 
         <!-- USER INFO -->
         <div class="info-fields">
+
           <div class="field-group">
+
             <label>Name</label>
-            <div class="field-value">{{ userName }}</div>
+
+            <div class="field-value">
+              {{ userName }}
+            </div>
+
           </div>
 
           <div class="field-group">
+
             <label>Email</label>
-            <div class="field-value">{{ userEmail }}</div>
+
+            <div class="field-value">
+              {{ userEmail }}
+            </div>
+
           </div>
+
         </div>
+
       </div>
+
     </section>
 
-    <!-- MY CLOSET -->
-    <!-- MY CLOSET CONTENT -->
-<div *ngIf="activeTab === 'closet'" class="closet-cards">
+    <!-- =========================
+         MY CLOSET
+    ========================== -->
 
-  <!-- Tops Card -->
-  <div class="closet-card">
-    <h3>Tops</h3>
-    <p>Manage your top clothing items</p>
-    <button (click)="addItem('tops')">
-      <img src="assets/Icons/Upload.png" src=class="plus-icon">
-      <p class="add-btn">Add Top</p>
-    </button>
-    <div class="items-grid">
-      <div class="item-card" *ngFor="let top of tops">
-        <img [src]="top.imageUrl" [alt]="top.name">
-        <p>{{ top.name }}</p>
+    <section *ngIf="activeTab === 'closet'" class="closet-cards">
+
+      <!-- =========================
+           TOPS
+      ========================== -->
+
+      <div class="closet-card">
+
+        <h3>Tops</h3>
+        <p>Manage your top clothing items</p>
+
+        <div class="items-grid">
+
+          <!-- ITEMS -->
+          <div
+            class="item-card"
+            *ngFor="let top of tops"
+          >
+
+            <img
+              [src]="top.imageUrl"
+              [alt]="top.name"
+            >
+
+            <div class="item-info">
+
+              <p class="item-name">
+                {{ top.name }}
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- ADD CARD -->
+          <button
+            class="add-item-card"
+            (click)="addItem('tops')"
+          >
+
+            <img
+              src="assets/Icons/Upload.png"
+              class="plus-icon"
+            >
+
+            <p class="add-btn">
+              Add Top
+            </p>
+
+          </button>
+
+        </div>
+
       </div>
-    </div>
-  </div>
 
-  <!-- Bottoms Card -->
-  <div class="closet-card">
-    <h3>Bottoms</h3>
-    <p>Manage your bottom clothing items</p>
-    <button (click)="addItem('bottoms')">
-      <img src="assets/Icons/Upload.png" class="plus-icon">
-      <p class="add-btn">Add Bottom</p>
-    </button>
-    <div class="items-grid">
-      <div class="item-card" *ngFor="let bottom of bottoms">
-        <img [src]="bottom.imageUrl" [alt]="bottom.name">
-        <p>{{ bottom.name }}</p>
+      <!-- =========================
+           BOTTOMS
+      ========================== -->
+
+      <div class="closet-card">
+
+        <h3>Bottoms</h3>
+        <p>Manage your bottom clothing items</p>
+
+        <div class="items-grid">
+
+          <!-- ITEMS -->
+          <div
+            class="item-card"
+            *ngFor="let bottom of bottoms"
+          >
+
+            <img
+              [src]="bottom.imageUrl"
+              [alt]="bottom.name"
+            >
+
+            <div class="item-info">
+
+              <p class="item-name">
+                {{ bottom.name }}
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- ADD CARD -->
+          <button
+            class="add-item-card"
+            (click)="addItem('bottoms')"
+          >
+
+            <img
+              src="assets/Icons/Upload.png"
+              class="plus-icon"
+            >
+
+            <p class="add-btn">
+              Add Bottom
+            </p>
+
+          </button>
+
+        </div>
+
       </div>
-    </div>
-  </div>
 
-  <!-- Shoes Card -->
-  <div class="closet-card">
-    <h3>Shoes</h3>
-    <p>Manage your shoe collection</p>
-    <button (click)="addItem('shoes')">
-      <img src="assets/Icons/Upload.png" src="assets/Icons/Upload.png" class="plus-icon">
-      <p class="add-btn">Add Shoes</p>
-    </button>
-    <div class="items-grid">
-      <div class="item-card" *ngFor="let shoe of shoes">
-        <img [src]="shoe.imageUrl" [alt]="shoe.name">
-        <p>{{ shoe.name }}</p>
+      <!-- =========================
+           SHOES
+      ========================== -->
+
+      <div class="closet-card">
+
+        <h3>Bags</h3>
+        <p>Manage your bgas collection</p>
+
+        <div class="items-grid">
+
+          <!-- ITEMS -->
+          <div
+            class="item-card"
+            *ngFor="let bag of shoes"
+          >
+
+            <img
+              [src]="bag.imageUrl"
+              [alt]="bag.name"
+            >
+
+            <div class="item-info">
+
+              <p class="item-name">
+                {{ bag.name }}
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- ADD CARD -->
+          <button
+            class="add-item-card"
+            (click)="addItem('shoes')"
+          >
+
+            <img
+              src="assets/Icons/Upload.png"
+              class="plus-icon"
+            >
+
+            <p class="add-btn">
+              Add Bag
+            </p>
+
+          </button>
+
+        </div>
+
       </div>
-    </div>
-  </div>
 
-</div>
+    </section>
+
   </main>
+
 </div>

@@ -379,6 +379,14 @@ color: #4A2C3B;
   flex-direction: column; /* خليها عمودي */
   gap: 20px;
   margin-top: 30px;
+
+
+
+
+
+
+ 
+  // width: 100%;
 }
 
 .closet-card {
@@ -459,4 +467,56 @@ color: #4A2C3B;
 
 .add-btn{
   color:#4A5565;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.add-item-card {
+  width: 170px;
+  height: 240px;
+
+  border: 2px dashed #f5a3c7;
+  border-radius: 18px;
+
+  background: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 12px;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.add-item-card:hover {
+  background: #fff5f9;
+  transform: translateY(-3px);
+}
+
+.item-info {
+  padding: 10px;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4A2C3B;
 }
