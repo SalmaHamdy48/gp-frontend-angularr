@@ -28,12 +28,12 @@
     <div class="card" *ngIf="activeTab === 'closet'">
       <h3>Your Closet</h3>
 
-      <div class="empty" *ngIf="tops.length + bottoms.length + bags.length === 0">
+      <div class="empty" *ngIf="tops.length + bottoms.length + shoes.length === 0">
        
         <button class="pink-btn" routerLink="/profile">Go to Profile to Add Items</button>
       </div>
 
-      <div class="items-grid" *ngIf="tops.length + bottoms.length + bags.length > 0">
+      <div class="items-grid" *ngIf="tops.length + bottoms.length + shoes.length > 0">
         <!-- هنا ممكن تحطي cards للـ tops, bottoms, shoes -->
       </div>
     </div>
@@ -124,12 +124,14 @@
         <div class="upload-item">
           <p>Shoes</p>
           <div class="items-row">
-            <div class="item-card" *ngFor="let item of bags">
+            <div class="item-card" *ngFor="let item of shoes">
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
+
+                
                 <div class="card-actions">
-                  <span class="edit" (click)="editItem(item, 'bag')">✏</span>
-                  <span class="delete" (click)="deleteItem(item, 'bag')">✕</span>
+                  <span class="edit" (click)="editItem(item, 'shoes')">✏</span>
+                  <span class="delete" (click)="deleteItem(item, 'shoes')">✕</span>
                 </div>
               </div>
               <div class="item-details">
@@ -152,7 +154,7 @@
                 multiple
                 (change)="onImageSelected($event, 'shoe')"
               />
-              <span>Add Bags</span>
+              <span>Add Shoes</span>
             </div>
           </div>
         </div>

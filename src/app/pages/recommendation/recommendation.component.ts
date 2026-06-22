@@ -16,14 +16,82 @@ interface Occasion {
   styleUrls: ['./recommendation.component.scss'],
 })
 export class RecommendationComponent implements OnInit {
- deleteItem(item: any, category: string) {
-  if (category === 'top') {
-    this.tops = this.tops.filter(i => i !== item);
-  } else if (category === 'bottom') {
-    this.bottoms = this.bottoms.filter(i => i !== item);
-  } else if (category === 'bag') {
-    this.bags = this.bags.filter(i => i !== item);
+//  deleteItem(item: any, category: string) {
+//   if (category === 'top') {
+//     this.tops = this.tops.filter(i => i !== item);
+//   } else if (category === 'bottom') {
+//     this.bottoms = this.bottoms.filter(i => i !== item);
+//   } else if (category === 'shoes') {
+//     this.shoes = this.shoes.filter(i => i !== item);
+//   }
+// }
+
+deleteItem(item: any, category: string) {
+
+  console.log(item);
+
+  if (item.id) {
+
+    this.recommendationService
+      .deleteUploadItem(this.userId, item.id)
+      .subscribe({
+
+        next: () => {
+
+          if (category === 'top') {
+            this.tops = this.tops.filter(i => i.id !== item.id);
+          }
+
+          else if (category === 'bottom') {
+            this.bottoms = this.bottoms.filter(i => i.id !== item.id);
+          }
+
+          else {
+            this.shoes = this.shoes.filter(i => i.id !== item.id);
+          }
+
+        },
+
+        error: err => console.log(err)
+
+      });
+
   }
+
+  else if (item.public_id) {
+
+    this.recommendationService
+      .deleteClosetItem(this.userId, item.public_id)
+      .subscribe({
+
+        next: () => {
+
+          if (category === 'top') {
+            this.tops = this.tops.filter(
+              i => i.public_id !== item.public_id
+            );
+          }
+
+          else if (category === 'bottom') {
+            this.bottoms = this.bottoms.filter(
+              i => i.public_id !== item.public_id
+            );
+          }
+
+          else {
+            this.shoes = this.shoes.filter(
+              i => i.public_id !== item.public_id
+            );
+          }
+
+        },
+
+        error: err => console.log(err)
+
+      });
+
+  }
+
 }
 
   isClosetEmpty: boolean = true;
@@ -46,13 +114,13 @@ export class RecommendationComponent implements OnInit {
   closet = {
     tops: [],
     bottoms: [],
-    bags: [],
+    shoes: [],
   };
 
   currentCategory: string = '';
   tops: any[] = [];
   bottoms: any[] = [];
-  bags: any[] = [];
+  shoes: any[] = [];
   currentType: string = '';
   activeTab: string = 'closet';
   // Modal
@@ -119,7 +187,7 @@ showError(message: string) {
 
       if (this.currentCategory === 'top') this.tops.push(item);
       if (this.currentCategory === 'bottom') this.bottoms.push(item);
-      if (this.currentCategory === 'shoe') this.bags.push(item);
+      if (this.currentCategory === 'shoe') this.shoes.push(item);
     }
 
     this.closeAddItem();
@@ -130,7 +198,7 @@ showError(message: string) {
 
     this.tops = items.filter(i => i.category === 'top');
     this.bottoms = items.filter(i => i.category === 'bottom');
-    this.bags = items.filter(i => i.category === 'foot');
+    this.shoes = items.filter(i => i.category === 'shoe');
 
     this.isClosetEmpty = items.length === 0;
   });
@@ -159,20 +227,30 @@ onImageSelected(event: any, type: 'top' | 'bottom' | 'shoe') {
     next: (res) => {
       console.log('Uploaded to closet:', res);
 
+      // const item = {
+      //   name: file.name,
+      //   image: res.url,
+      //   type: res.subtype || '',
+      //   color: res.color || '',
+      //   gender: res.gender || '',
+      //   season: res.season || '',
+      //   usage: res.usage || '',
+      // };
       const item = {
-        name: file.name,
-        image: res.url,
-        type: res.subtype || '',
-        color: res.color || '',
-        gender: res.gender || '',
-        season: res.season || '',
-        usage: res.usage || '',
-      };
+  id: res.id,
+  name: file.name,
+  image: res.url,
+  type: res.subtype || '',
+  color: res.color || '',
+  gender: res.gender || '',
+  season: res.season || '',
+  usage: res.usage || '',
+};
 
       // UI فقط
       if (type === 'top') this.tops.push(item);
       else if (type === 'bottom') this.bottoms.push(item);
-      else this.bags.push(item);
+      else this.shoes.push(item);
 
       this.selectedImage = res.url;
 
@@ -210,7 +288,7 @@ getRecommendations(): void {
       this.recommendedOutfit = [
         res.top ? { ...res.top, image: baseUrl + res.top.image_url } : null,
         res.bottom ? { ...res.bottom, image: baseUrl + res.bottom.image_url } : null,
-        res.bag ? { ...res.bag, image: baseUrl + res.bag.image_url } : null,
+        res.shoes? { ...res.shoes, image: baseUrl + res.shoes.image_url } : null,
       ].filter(Boolean);
 
       this.showRecommendations = true;
