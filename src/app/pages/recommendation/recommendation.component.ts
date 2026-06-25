@@ -1,62 +1,55 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from 'src/app/shared/services/auth/auth.service';
-// import { ProfileService } from 'src/app/shared/services/profile/profile.service';
-import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
+import {
+  RecommendationService,
+  UploadItem,
+  ClosetItem
+} from 'src/app/shared/services/recommendation/recommendation.service';
+import { environment } from 'src/app/enviroments/enviroment';
 
-
-
-interface Occasion {
-  id: string;
-  label: string;
+interface DisplayItem {
+  id?: number;
+  public_id?: string;
+  image: string;
+  name: string;
+  type: string;
+  color?: string;
+  gender?: string;
+  season?: string;
+  usage?: string;
+  category?: string;
 }
 
 @Component({
   selector: 'app-recommendation',
   templateUrl: './recommendation.component.html',
-  styleUrls: ['./recommendation.component.scss'],
+  styleUrls: ['./recommendation.component.scss']
 })
 export class RecommendationComponent implements OnInit {
- deleteItem(item: any, category: string) {
-  if (category === 'top') {
-    this.tops = this.tops.filter(i => i !== item);
-  } else if (category === 'bottom') {
-    this.bottoms = this.bottoms.filter(i => i !== item);
-  } else if (category === 'bag') {
-    this.bags = this.bags.filter(i => i !== item);
-  }
-}
 
-  isClosetEmpty: boolean = true;
-  selectedTab: string = 'use-closet';
-  selectedOccasion: string = '';
-  showRecommendations: boolean = false;
+  userId = '';
+
+  uploads: UploadItem[] = [];
+  closetItems: ClosetItem[] = [];
+
+  tops: DisplayItem[] = [];
+  bottoms: DisplayItem[] = [];
+  shoes: DisplayItem[] = [];
+
+  closetTops: DisplayItem[] = [];
+  closetBottoms: DisplayItem[] = [];
+  closetShoes: DisplayItem[] = [];
+
   loadingRecommendations = false;
-  
-  occasions: Occasion[] = [
-    { id: 'casual', label: 'Casual' },
-    { id: 'business', label: 'business/professional' },
-    { id: 'formal', label: 'Formal Event' },
-    { id: 'party', label: 'party/night out' },
-    { id: 'date', label: 'date night' },
-    { id: 'workout', label: 'Workout/Athletic' },
-    { id: 'beach', label: 'Beach/vacation' },
-    { id: 'wedding', label: 'wedding' },
-  ];
+  showRecommendations = false;
 
-  closet = {
-    tops: [],
-    bottoms: [],
-    bags: [],
-  };
+  recommendedOutfit: DisplayItem[] = [];
+  activeTab: 'upload' | 'closet' = 'upload';
 
-  currentCategory: string = '';
-  tops: any[] = [];
-  bottoms: any[] = [];
-  bags: any[] = [];
-  currentType: string = '';
-  activeTab: string = 'closet';
-  // Modal
-  showAddItemModal: boolean = false;
+  showAddItemModal = false;
+  editingItemId: number | null = null;
+  selectedImage = '';
+  showToast = false;
+  toastMessage = '';
 
   newItem = {
     name: '',
@@ -64,227 +57,315 @@ export class RecommendationComponent implements OnInit {
     color: '',
     gender: '',
     season: '',
-    occasion: '',
+    occasion: ''
   };
 
-  closetItems: any[] = [
-    // Mock data - would be populated from profile
-  ];
+  selectedOccasion = 'any';
 
-  selectedFile!: File;
-  selectedCategory: string = '';
-  previewImage: string = '';
-  selectedImage: string | null = null;
-  editingItem: any = null;
-  editingCategory: string = '';
-userId: string='';
-  // this.selectedCategory = type;
-  constructor(private recommendationService: RecommendationService , private AuthService:AuthService) {}
+  constructor(
+    private recommendationService: RecommendationService
+  ) {}
 
-  toastMessage: string = '';
-showToast: boolean = false;
-
-showError(message: string) {
-  this.toastMessage = message;
-  this.showToast = true;
-
-  setTimeout(() => {
-    this.showToast = false;
-  }, 3000);
-}
-  ngOnInit() {
-    this.userId = this.AuthService.currentUser?.id || '';
-    this.fetchCloset();
-  }
-
-  openAddItem(category: string) {
-    this.selectedCategory = category;
-    this.currentCategory = category;
-    this.showAddItemModal = true;
-  }
-
-  addItem() {
-    if (this.editingItem) {
-      this.editingItem.name = this.newItem.name;
-      this.editingItem.type = this.newItem.type;
-      this.editingItem.color = this.newItem.color;
-      this.editingItem.gender = this.newItem.gender;
-      this.editingItem.season = this.newItem.season;
-      this.editingItem.occasion = this.newItem.occasion;
-    } else {
-      const item = {
-        image: this.selectedImage,
-        ...this.newItem,
-      };
-
-      if (this.currentCategory === 'top') this.tops.push(item);
-      if (this.currentCategory === 'bottom') this.bottoms.push(item);
-      if (this.currentCategory === 'shoe') this.bags.push(item);
+  ngOnInit(): void {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      this.userId = JSON.parse(storedUser).id || '';
     }
 
-    this.closeAddItem();
-  }
-  fetchCloset() {
-  this.recommendationService.getClosetItems(this.userId).subscribe(res => {
-    const items = res.items || [];
+    if (!this.userId) {
+      return;
+    }
 
-    this.tops = items.filter(i => i.category === 'top');
-    this.bottoms = items.filter(i => i.category === 'bottom');
-    this.bags = items.filter(i => i.category === 'foot');
-
-    this.isClosetEmpty = items.length === 0;
-  });
-}
-  switchTab(tab: string): void {
-    this.selectedTab = tab;
+    this.loadUploads();
+    this.loadCloset();
   }
 
-  setTab(tab: 'closet' | 'upload') {
-  this.activeTab = tab;
+  setTab(tab: 'upload' | 'closet'): void {
+    this.activeTab = tab;
+    this.showRecommendations = false;
 
-  if (tab === 'closet') {
-   this.fetchCloset();
-  }
-}
-  selectOccasion(occasion: string): void {
-    this.selectedOccasion = occasion;
+    if (tab === 'upload') {
+      this.loadUploads();
+    }
   }
 
-onImageSelected(event: any, type: 'top' | 'bottom' | 'shoe') {
-  const file: File = event.target.files[0];
-  if (!file) return;
+  loadUploads(): void {
+    this.recommendationService.getUploads(this.userId).subscribe({
+      next: (response) => {
+        this.uploads = response.items.filter(item => item.source === 'upload');
+        this.tops = this.uploads
+          .filter(x => x.category === 'top')
+          .map(item => this.toDisplayItem(item));
+        this.bottoms = this.uploads
+          .filter(x => x.category === 'bottom')
+          .map(item => this.toDisplayItem(item));
+        this.shoes = this.uploads
+          .filter(x => x.category === 'foot')
+          .map(item => this.toDisplayItem(item));
+      },
+      error: err => console.error(err)
+    });
+  }
 
-  // 1️⃣ ارفعي في closet (اختياري)
-  this.recommendationService.addClosetItem(this.userId, file).subscribe({
-    next: (res) => {
-      console.log('Uploaded to closet:', res);
+  loadCloset(): void {
+    this.recommendationService.getClosetItems(this.userId).subscribe({
+      next: (response) => {
+        this.closetItems = response.items;
+        this.closetTops = this.closetItems
+          .filter(x => (x.category || '').toLowerCase().includes('top'))
+          .map(item => this.toClosetDisplayItem(item));
+        this.closetBottoms = this.closetItems
+          .filter(x => (x.category || '').toLowerCase().includes('bottom'))
+          .map(item => this.toClosetDisplayItem(item));
+        this.closetShoes = this.closetItems
+          .filter(x => {
+            const cat = (x.category || '').toLowerCase();
+            return !cat.includes('top') && !cat.includes('bottom');
+          })
+          .map(item => this.toClosetDisplayItem(item));
+      },
+      error: err => console.error(err)
+    });
+  }
 
-      const item = {
-        name: file.name,
-        image: res.url,
-        type: res.subtype || '',
-        color: res.color || '',
-        gender: res.gender || '',
-        season: res.season || '',
-        usage: res.usage || '',
-      };
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
 
-      // UI فقط
-      if (type === 'top') this.tops.push(item);
-      else if (type === 'bottom') this.bottoms.push(item);
-      else this.bags.push(item);
+    if (!files || files.length === 0) {
+      return;
+    }
 
-      this.selectedImage = res.url;
-
-      // 2️⃣ 👇 أهم خطوة (تضيف للـ recommendation)
+    Array.from(files).forEach((file) => {
       this.recommendationService
         .addUploadItem(this.userId, 'upload', file)
         .subscribe({
-          next: (uploadRes) => {
-            console.log('Added to uploads (rec):', uploadRes);
-          },
-          error: (err) => {
-            console.error('Upload to rec failed', err);
-          },
+          next: () => this.loadUploads(),
+          error: err => console.error(err)
         });
-    },
+    });
 
-    error: (err) => {
-      console.error('Upload error', err);
-      this.showError('Failed to upload image!');
-    },
-  });
-}
-recommendedOutfit: any[] = [];
-getRecommendations(): void {
-  if (this.loadingRecommendations) return;
-  this.recommendedOutfit = [];
-  this.showRecommendations = false;
-  this.loadingRecommendations = true;
-  this.recommendationService.getOutfitRecommendation(this.userId).subscribe({
-    next: (res) => {
-      console.log('Recommended outfit response:', res);
-
-      // هنا بنضيف الـ backend base URL للصور
-      const baseUrl = 'http://127.0.0.1:8000'; // ممكن كمان تاخديه من environment.apiUrl
-      this.recommendedOutfit = [
-        res.top ? { ...res.top, image: baseUrl + res.top.image_url } : null,
-        res.bottom ? { ...res.bottom, image: baseUrl + res.bottom.image_url } : null,
-        res.bag ? { ...res.bag, image: baseUrl + res.bag.image_url } : null,
-      ].filter(Boolean);
-
-      this.showRecommendations = true;
-      this.loadingRecommendations = false;
-    },
-    error: (err) => {
-      console.error('Error fetching recommendations', err);
-      this.loadingRecommendations = false;
-      this.showError('Failed to get outfit recommendations!');
-    },
-    complete: () => {
-  this.loadingRecommendations = false;
-}
-  });
-}
-
-  goToProfile(): void {
-    // Navigate to profile to add items
-    console.log('Navigate to profile');
+    input.value = '';
   }
- editItem(item: any, category: string) {
-  this.editingItem = item;
-  this.editingCategory = category;
 
-  this.newItem = {
-    name: item.name || '',
+  getRecommendation(): void {
+    this.loadingRecommendations = true;
+    this.showRecommendations = false;
 
-    // ✅ أهم سطر
-    type: item.type || item.subtype || '',
+    const useCloset = this.activeTab === 'closet';
 
-    color: item.color || this.mapColor(item.color_group),
+    this.recommendationService
+      .getOutfitRecommendation(
+        this.userId,
+        this.selectedOccasion,
+        useCloset
+      )
+      .subscribe({
+        next: (response) => {
+          this.loadingRecommendations = false;
+          this.showRecommendations = true;
+          this.recommendedOutfit = [];
 
-    gender: item.gender || '',
+          if (response.top) {
+            this.recommendedOutfit.push(this.toDisplayItem(response.top));
+          }
+          if (response.bottom) {
+            this.recommendedOutfit.push(this.toDisplayItem(response.bottom));
+          }
+          if (response.shoes) {
+            this.recommendedOutfit.push(this.toDisplayItem(response.shoes));
+          }
+        },
+        error: err => {
+          this.loadingRecommendations = false;
+          this.showToastMessage(
+            err?.error?.detail || 'Could not generate outfit. Add tops, bottoms, and shoes first.'
+          );
+          console.error(err);
+        }
+      });
+  }
 
-    season: item.season || '',
+  deleteItem(item: DisplayItem): void {
+    if (!item.id) {
+      return;
+    }
 
-    // ✅ usage → occasion
-    occasion: item.occasion || item.usage || '',
-  };
+    this.recommendationService
+      .deleteUploadItem(this.userId, item.id)
+      .subscribe({
+        next: () => this.loadUploads(),
+        error: err => console.error(err)
+      });
+  }
 
-  this.selectedImage = item.image || item.image_url;
+  editItem(item: DisplayItem): void {
+    if (!item.id) {
+      return;
+    }
 
-  this.showAddItemModal = true;
-}
-mapColor(colorGroup: number): string {
-  const colors: any = {
-    1: 'Black',
-    2: 'White',
-    3: 'Red',
-    4: 'Blue',
-    5: 'Green',
-    6: 'Yellow',
-    7: 'Pink',
-    8: 'Purple',
-    9: 'Brown',
-    10: 'Gray',
-    11: 'Orange',
-    12: 'Beige', // 👈 غالبًا ده
-  };
+    this.editingItemId = item.id;
+    this.selectedImage = item.image;
+    this.newItem = {
+      name: item.name || '',
+      type: item.type || '',
+      color: item.color || '',
+      gender: item.gender || '',
+      season: item.season || '',
+      occasion: this.mapUsageToOccasion(item.usage)
+    };
+    this.showAddItemModal = true;
+  }
 
-  return colors[colorGroup] || '';
-}
-  closeAddItem() {
+  saveItem(): void {
+    if (!this.editingItemId) {
+      return;
+    }
+
+    const payload: {
+      type?: string;
+      color?: string;
+      gender?: string;
+      season?: string;
+      usage?: string;
+    } = {};
+
+    if (this.newItem.type || this.newItem.name) {
+      payload.type = this.newItem.type || this.newItem.name;
+    }
+    if (this.newItem.color && this.newItem.color !== 'Select color') {
+      payload.color = this.newItem.color;
+    }
+    if (this.newItem.gender && this.newItem.gender !== 'Select gender') {
+      payload.gender = this.newItem.gender;
+    }
+    if (this.newItem.season && this.newItem.season !== 'Select season') {
+      payload.season = this.newItem.season;
+    }
+
+    const usage = this.mapOccasionToUsage(this.newItem.occasion);
+    if (usage) {
+      payload.usage = usage;
+    }
+
+    this.recommendationService
+      .updateUploadItem(this.userId, this.editingItemId, payload)
+      .subscribe({
+        next: () => {
+          this.showToastMessage('Item updated successfully');
+          this.closeAddItem();
+          this.loadUploads();
+        },
+        error: (err) => {
+          console.error(err);
+          this.showToastMessage('Failed to update item');
+        }
+      });
+  }
+
+  closeAddItem(): void {
     this.showAddItemModal = false;
-    this.editingItem = null;
-
+    this.editingItemId = null;
+    this.selectedImage = '';
     this.newItem = {
       name: '',
       type: '',
       color: '',
       gender: '',
       season: '',
-      occasion: '',
+      occasion: ''
     };
   }
-  
+
+  addItem(): void {
+    this.saveItem();
+  }
+
+  get isEditingItem(): boolean {
+    return this.editingItemId !== null;
+  }
+
+  private mapOccasionToUsage(occasion: string): string | undefined {
+    const map: Record<string, string> = {
+      Casual: 'Casual',
+      Business: 'Smart Casual',
+      Formal: 'Formal',
+      Party: 'Party',
+      Athletic: 'Sports',
+      Beach: 'Casual',
+      'Any Occasion': ''
+    };
+
+    const usage = map[occasion];
+    return usage || undefined;
+  }
+
+  private mapUsageToOccasion(usage?: string): string {
+    if (!usage) {
+      return '';
+    }
+
+    const map: Record<string, string> = {
+      Casual: 'Casual',
+      'Smart Casual': 'Business',
+      Formal: 'Formal',
+      Party: 'Party',
+      Sports: 'Athletic',
+      Ethnic: 'Formal'
+    };
+
+    return map[usage] || usage;
+  }
+
+  get closetItemCount(): number {
+    return this.closetTops.length + this.closetBottoms.length + this.closetShoes.length;
+  }
+
+  private toDisplayItem(item: any): DisplayItem {
+    return {
+      id: item.id,
+      public_id: item.cloudinary_public_id || item.public_id,
+      image: this.resolveImageUrl(item),
+      name: item.subtype || item.category || 'Item',
+      type: item.subtype || item.category || '',
+      color: item.color,
+      gender: item.gender,
+      season: item.season,
+      usage: item.usage,
+      category: item.category
+    };
+  }
+
+  private toClosetDisplayItem(item: ClosetItem): DisplayItem {
+    return {
+      public_id: item.public_id,
+      image: item.url,
+      name: item.subtype || item.category || 'Item',
+      type: item.subtype || item.category || '',
+      color: item.color,
+      gender: item.gender,
+      season: item.season,
+      category: item.category
+    };
+  }
+
+  private resolveImageUrl(item: any): string {
+    const url = item.image_url || item.url || item.image || '';
+    if (!url) {
+      return '';
+    }
+    if (url.startsWith('http')) {
+      return url;
+    }
+    const base = environment.apiUrl.replace(/\/$/, '');
+    return url.startsWith('/') ? `${base}${url}` : `${base}/${url}`;
+  }
+
+  private showToastMessage(message: string): void {
+    this.toastMessage = message;
+    this.showToast = true;
+    setTimeout(() => {
+      this.showToast = false;
+    }, 3000);
+  }
 }

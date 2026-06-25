@@ -30,6 +30,9 @@ export class ProfileComponent implements OnInit {
   bottoms: any[] = [];
   shoes: any[] = [];
 
+  @ViewChild('profileInput')
+  profileInput!: ElementRef<HTMLInputElement>;
+
   @ViewChild('closetInput')
   closetInput!: ElementRef<HTMLInputElement>;
 
@@ -80,12 +83,8 @@ export class ProfileComponent implements OnInit {
       });
   }
 
-  triggerProfileUpload() {
-    const input = document.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
-
-    input?.click();
+  triggerProfileUpload(): void {
+    this.profileInput?.nativeElement?.click();
   }
   uploadClosetItem() {
   

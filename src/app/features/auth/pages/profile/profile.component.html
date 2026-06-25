@@ -223,26 +223,26 @@
 
       <div class="closet-card">
 
-        <h3>Bags</h3>
-        <p>Manage your bgas collection</p>
+        <h3>Shoes</h3>
+        <p>Manage your shoes collection</p>
 
         <div class="items-grid">
 
           <!-- ITEMS -->
           <div
             class="item-card"
-            *ngFor="let bag of shoes"
+            *ngFor="let shoe of shoes"
           >
 
             <img
-              [src]="bag.imageUrl"
-              [alt]="bag.name"
+              [src]="shoe.imageUrl"
+              [alt]="shoe.name"
             >
 
             <div class="item-info">
 
               <p class="item-name">
-                {{ bag.name }}
+                {{ shoe.name }}
               </p>
 
             </div>
@@ -261,7 +261,7 @@
             >
 
             <p class="add-btn">
-              Add Bag
+              Add Shoe
             </p>
 
           </button>

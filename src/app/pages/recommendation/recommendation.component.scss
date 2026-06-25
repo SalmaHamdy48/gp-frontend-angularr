@@ -99,6 +99,19 @@
   margin:auto;
 }
 
+// .main-content {
+//   max-width: 1200px;   /* same width as Figma */
+//   width: 100%;
+//   margin: 0 auto;
+// }
+
+.tabs,
+.card,
+.occasion {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .outfit-recommendation {
   color:#4A2C3B;
   margin: 15px 0 0 0;
@@ -529,6 +542,123 @@ select {
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   animation: fadeIn 0.3s ease;
 }
+
+
+// .occasion {
+//   background: #fff;
+//   border-radius: 20px;
+//   padding: 16px 20px;
+//   width: 100%;
+// }
+
+// .occasion label {
+//   display: block;
+//   margin-bottom: 100px;
+//   // margin-right: 400px;
+//   font-size: 16px;
+//   font-weight: 500;
+//   color: #444;
+//   width: 100%;
+// }
+
+// .occasion-row {
+//   display: flex;
+//   align-items: center;
+//   gap: 12px;
+// }
+
+// .occasion-row select {
+//   flex: 2;
+//   height: 48px;
+//   border: none;
+//   border-radius: 12px;
+//   background: #fcecf3;
+//   // padding: 0 16px;
+//   // margin-left: -400px;
+//   font-size: 15px;
+//   width:25%
+// }
+
+// .recommend-btn {
+//   // width: 215px;
+//   width:75%;
+//   height: 48px;
+//   border: none;
+//   border-radius: 12px;
+//   background: #ee9dc4;
+//   color: white;
+//   font-size: 15px;
+//   cursor: pointer;
+//   flex-shrink: 0;
+// }
+
+
+
+// .occasion {
+//   background: #fff;
+//   border-radius: 20px;
+//   padding: 16px 20px;
+//   box-sizing: border-box; 
+//   width: 100%;
+// }
+
+// .occasion {
+//   background: #fff;
+//   border-radius: 16px; /* Optional: Changed from 20px to 16px to match .card's corners */
+//   padding: 30px;       /* Matched to the top .card padding */
+//   box-sizing: border-box; 
+//   width: 100%;
+// }
+// .occasion {
+//   background: #fff;
+//   border-radius: 16px; /* Optional: Changed from 20px to 16px to match .card's corners */
+//   padding: 30px;       /* Matched to the top .card padding */
+//   box-sizing: border-box; 
+//   width: 100%;
+// }
+
+.occasion label {
+  display: block;
+  margin-bottom: 12px; /* Changed from 100px to a clean layout gap */
+  font-size: 16px;
+  font-weight: 500;
+  color: #444;
+}
+
+.occasion-row {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Space between select dropdown and button */
+  width: 100%;
+}
+
+.occasion-row select {
+  flex: 1; /* Tells the dropdown to take up all remaining available space */
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #fcecf3;
+  padding: 0 16px;
+  font-size: 15px;
+  outline: none;
+}
+
+.recommend-btn {
+  width: 215px; /* Fixed width matching the Figma layout aspect ratio */
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #ee9dc4;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  flex-shrink: 0; /* Prevents the button from shrinking */
+}
+
+
+
+
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

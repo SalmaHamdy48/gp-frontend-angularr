@@ -1,151 +1,157 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { VtonService } from 'src/app/shared/services/vton/vton.service';
-import { AuthService } from 'src/app/shared/services/auth/auth.service'; 
-import { RecommendationService } from 'src/app/shared/services/recommendation/recommendation.service';
+import { AuthService } from 'src/app/shared/services/auth/auth.service';
+import { ProfileService } from 'src/app/shared/services/profile/profile.service';
 
 @Component({
   selector: 'app-virtual-try-on',
   templateUrl: './virtual-try-on.component.html',
   styleUrls: ['./virtual-try-on.component.scss']
 })
-export class VirtualTryOnComponent {
+export class VirtualTryOnComponent implements OnInit {
 
   profilePreview: string | null = null;
   itemPreview: string | null = null;
-  selectedCategory: string = '';
-  profileFile!: File;
-  itemFile!: File;
-  resultImage: string = '';
-categoryMap: any = {
-  dress: 'dresses',
-  top: 'upper_body',
-  bottom: 'lower_body',
-  shoes: 'shoes'
-};
-  // Flag to show result card
+  selectedCategory = '';
+  profileFile?: File;
+  itemFile?: File;
+  resultImage = '';
+
+  readonly categoryMap: Record<string, string> = {
+    dress: 'dresses',
+    top: 'upper_body',
+    bottom: 'lower_body',
+    shoes: 'shoes'
+  };
+
   showResult = false;
-  activeTab: 'upload' | 'closet' = 'upload';
-  profileReady = false;
+  loadingVton = false;
+  userId = '';
 
-closetItems: any[] = [];
-selectedClosetItem: any = null;
+  constructor(
+    private vtonService: VtonService,
+    private authService: AuthService,
+    private profileService: ProfileService
+  ) {}
 
-userId: string = '';
+  ngOnInit(): void {
+    const user = this.authService.currentUser;
+    if (!user?.id) {
+      return;
+    }
 
-  constructor(private vtonService: VtonService, private authService: AuthService, private recommendationService: RecommendationService) {}
+    this.userId = user.id;
+    this.loadSavedProfilePhoto();
+  }
 
-ngOnInit() {
-  this.authService.getCurrentUser().subscribe(res => {
-    this.userId = res.id;
+  loadSavedProfilePhoto(): void {
+    this.profileService.getProfilePhoto(this.userId).subscribe({
+      next: (res: any) => {
+        const imageUrl = res?.image_url;
+        if (!imageUrl) {
+          return;
+        }
 
-    this.loadCloset(); // 👈 هنا الصح
-  });
-}
-loadCloset() {
-  if (!this.userId) return;
+        this.profilePreview = imageUrl;
+        this.vtonService.fetchImageAsFile(imageUrl, 'profile.jpg').subscribe({
+          next: (file) => {
+            this.profileFile = file;
+          },
+          error: () => {
+            this.profilePreview = null;
+          }
+        });
+      }
+    });
+  }
 
-  this.recommendationService.getClosetItems(this.userId).subscribe(res => {
-    const items = res.items || [];
+  onProfileUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
 
-    this.closetItems = items.map((i: any) => ({
-      ...i,
-      image: i.url // 👈 مهم جدًا (مش image_url)
-    }));
-  });
-}
-
-selectClosetItem(item: any) {
-  this.selectedClosetItem = item;
-  this.selectedCategory = item.category;
-
-  console.log("selected item:", item);
-}
-
-  onProfileUpload(event: any) {
-  const file = event.target.files[0];
-  if (file) {
     this.profileFile = file;
 
     const reader = new FileReader();
     reader.onload = () => {
       this.profilePreview = reader.result as string;
-      this.profileReady = true; // 👈 مهم
     };
-
     reader.readAsDataURL(file);
+    input.value = '';
   }
-}
 
-get filteredClosetItems() {
-  if (!this.selectedCategory) return this.closetItems;
-
-  return this.closetItems.filter(
-    item => item.category === this.selectedCategory
-  );
-}
-  onItemUpload(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.itemFile = file;
-
-      const reader = new FileReader();
-      reader.onload = () => this.itemPreview = reader.result as string;
-      reader.readAsDataURL(file);
+  onItemUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
     }
+
+    this.itemFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.itemPreview = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
   }
 
-tryItOn() {
-
-  if (!this.profileFile) {
-    alert("Upload your photo first");
-    return;
-  }
-
-  const formData = new FormData();
-
-  formData.append('person_image', this.profileFile);
-
-  // ✅ Upload Mode
-  if (this.activeTab === 'upload') {
+  tryItOn(): void {
+    if (!this.profileFile) {
+      alert('Upload your photo first');
+      return;
+    }
 
     if (!this.itemFile || !this.selectedCategory) {
-      alert("Upload item first");
+      alert('Upload item and select a type first');
       return;
     }
 
     const backendCategory = this.categoryMap[this.selectedCategory];
-
-    formData.append('cloth_image', this.itemFile);
-    formData.append('category', backendCategory);
-  }
-
-  // ✅ Closet Mode
-  else if (this.activeTab === 'closet') {
-
-    if (!this.selectedClosetItem) {
-      alert("Select item from closet");
+    if (!backendCategory) {
+      alert('Invalid item type selected');
       return;
     }
 
-    const backendCategory = this.categoryMap[this.selectedClosetItem.category];
-
-    formData.append('cloth_image_url', this.selectedClosetItem.image);
+    const formData = new FormData();
+    formData.append('person_image', this.profileFile);
+    formData.append('cloth_image', this.itemFile);
     formData.append('category', backendCategory);
+
+    this.loadingVton = true;
+    this.showResult = false;
+    this.resultImage = '';
+
+    this.vtonService.createVton(formData).subscribe({
+      next: () => this.pollVtonResult(),
+      error: (err) => {
+        this.loadingVton = false;
+        alert(err?.error?.detail || 'Try-on failed to start');
+      }
+    });
   }
 
-  this.vtonService.createVton(formData).subscribe({
-    next: () => {
+  private pollVtonResult(attempt = 0): void {
+    const maxAttempts = 150;
+    const delayMs = 5000;
 
-      setTimeout(() => {
-
-        this.vtonService.getVtonData().subscribe((blob: Blob) => {
-          this.resultImage = URL.createObjectURL(blob);
-          this.showResult = true;
-        });
-
-      }, 8000);
-
-    }
-  });
-}
+    this.vtonService.getVtonData().subscribe({
+      next: (blob: Blob) => {
+        this.loadingVton = false;
+        this.resultImage = URL.createObjectURL(blob);
+        this.showResult = true;
+      },
+      error: () => {
+        if (attempt < maxAttempts) {
+          setTimeout(() => this.pollVtonResult(attempt + 1), delayMs);
+        } else {
+          this.loadingVton = false;
+          alert('Try-on is still processing. Please try again in a few minutes.');
+        }
+      }
+    });
+  }
 }

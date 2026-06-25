@@ -27,14 +27,73 @@
     <!-- CLOSET TAB -->
     <div class="card" *ngIf="activeTab === 'closet'">
       <h3>Your Closet</h3>
+      <p class="small">Outfits are built from items you saved in your profile closet.</p>
 
-      <div class="empty" *ngIf="tops.length + bottoms.length + bags.length === 0">
-       
+      <div class="empty" *ngIf="closetItemCount === 0">
+        <p>You have no closet items yet.</p>
         <button class="pink-btn" routerLink="/profile">Go to Profile to Add Items</button>
       </div>
 
-      <div class="items-grid" *ngIf="tops.length + bottoms.length + bags.length > 0">
-        <!-- هنا ممكن تحطي cards للـ tops, bottoms, shoes -->
+      <div class="upload-grid" *ngIf="closetItemCount > 0">
+        <div class="upload-item">
+          <p>Tops</p>
+          <div class="items-row">
+            <div class="item-card" *ngFor="let item of closetTops">
+              <div class="item-image">
+                <img [src]="item.image" [alt]="item.name" />
+              </div>
+              <div class="item-details">
+                <div class="item-title">{{ item.name }}</div>
+                <div class="item-type">{{ item.type }}</div>
+                <div class="tags" *ngIf="item.color || item.gender || item.season">
+                  <span class="tag pink" *ngIf="item.color">{{ item.color }}</span>
+                  <span class="tag gray" *ngIf="item.gender">{{ item.gender }}</span>
+                  <span class="tag gray" *ngIf="item.season">{{ item.season }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-item">
+          <p>Bottoms</p>
+          <div class="items-row">
+            <div class="item-card" *ngFor="let item of closetBottoms">
+              <div class="item-image">
+                <img [src]="item.image" [alt]="item.name" />
+              </div>
+              <div class="item-details">
+                <div class="item-title">{{ item.name }}</div>
+                <div class="item-type">{{ item.type }}</div>
+                <div class="tags" *ngIf="item.color || item.gender || item.season">
+                  <span class="tag pink" *ngIf="item.color">{{ item.color }}</span>
+                  <span class="tag gray" *ngIf="item.gender">{{ item.gender }}</span>
+                  <span class="tag gray" *ngIf="item.season">{{ item.season }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-item">
+          <p>Shoes</p>
+          <div class="items-row">
+            <div class="item-card" *ngFor="let item of closetShoes">
+              <div class="item-image">
+                <img [src]="item.image" [alt]="item.name" />
+              </div>
+              <div class="item-details">
+                <div class="item-title">{{ item.name }}</div>
+                <div class="item-type">{{ item.type }}</div>
+                <div class="tags" *ngIf="item.color || item.gender || item.season">
+                  <span class="tag pink" *ngIf="item.color">{{ item.color }}</span>
+                  <span class="tag gray" *ngIf="item.gender">{{ item.gender }}</span>
+                  <span class="tag gray" *ngIf="item.season">{{ item.season }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -54,8 +113,8 @@
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
                 <div class="card-actions">
-                  <span class="edit" (click)="editItem(item, 'top')">✏</span>
-                  <span class="delete" (click)="deleteItem(item, 'top')">✕</span>
+                  <span class="edit" (click)="editItem(item)">✏</span>
+                  <span class="delete" (click)="deleteItem(item)">✕</span>
                 </div>
               </div>
               <div class="item-details">
@@ -76,7 +135,7 @@
                 #topInput
                 accept="image/*"
                 multiple
-                (change)="onImageSelected($event, 'top')"
+                (change)="onImageSelected($event)"
               />
               <span>Add Top</span>
             </div>
@@ -91,8 +150,8 @@
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
                 <div class="card-actions">
-                  <span class="edit" (click)="editItem(item, 'bottom')">✏</span>
-                  <span class="delete" (click)="deleteItem(item, 'bottom')">✕</span>
+                  <span class="edit" (click)="editItem(item)">✏</span>
+                  <span class="delete" (click)="deleteItem(item)">✕</span>
                 </div>
               </div>
               <div class="item-details">
@@ -113,7 +172,7 @@
                 #bottomInput
                 accept="image/*"
                 multiple
-                (change)="onImageSelected($event, 'bottom')"
+                (change)="onImageSelected($event)"
               />
               <span>Add Bottom</span>
             </div>
@@ -124,12 +183,12 @@
         <div class="upload-item">
           <p>Shoes</p>
           <div class="items-row">
-            <div class="item-card" *ngFor="let item of bags">
+            <div class="item-card" *ngFor="let item of shoes">
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
                 <div class="card-actions">
-                  <span class="edit" (click)="editItem(item, 'bag')">✏</span>
-                  <span class="delete" (click)="deleteItem(item, 'bag')">✕</span>
+                  <span class="edit" (click)="editItem(item)">✏</span>
+                  <span class="delete" (click)="deleteItem(item)">✕</span>
                 </div>
               </div>
               <div class="item-details">
@@ -150,28 +209,44 @@
                 #shoeInput
                 accept="image/*"
                 multiple
-                (change)="onImageSelected($event, 'shoe')"
+                (change)="onImageSelected($event)"
               />
-              <span>Add Bags</span>
+              <span>Add Shoes</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Get Recommendations -->
-    <div class="occasion">
-  <button 
-    class="recommend-btn" 
-    (click)="getRecommendations()"
-    [disabled]="loadingRecommendations">
-     Get Recommendations
-  </button>
+
+
+<div class="occasion">
+  <label>Select Occasion</label>
+
+  <div class="occasion-row">
+   <select
+  [(ngModel)]="selectedOccasion"
+  title="choose an occasion"
+>
+  <option value="any">Any</option>
+  <option value="casual">Casual</option>
+  <option value="ethnic">Ethnic</option>
+  <option value="formal">Formal</option>
+  <option value="party">Party</option>
+  <option value="smart_casual">Smart Casual</option>
+  <option value="sports">Sports</option>
+       </select>
+  
+    <button class="recommend-btn" (click)="getRecommendation()">✨ Get Recommendations
+    </button>
+
+  </div>
 </div>
+
 
 <!-- LOADING STATE -->
 <div *ngIf="loadingRecommendations" class="loading-state">
-  <p>Generating your outfit... </p>
+  <p>Generating your outfit...</p>
 </div>
 
     <!-- Recommended Outfit -->
@@ -199,7 +274,7 @@
   <div class="modal-overlay" *ngIf="showAddItemModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h2>Add Item Details </h2>
+        <h2>{{ isEditingItem ? 'Edit Item Details' : 'Add Item Details' }}</h2>
         <span class="close" (click)="closeAddItem()">✕</span>
       </div>
 
@@ -296,11 +371,12 @@
 
       <div class="modal-buttons">
         <button class="cancel-btn" (click)="closeAddItem()">Cancel</button>
-        <button class="add-btn" (click)="addItem()">Add Item</button>
+        <button class="add-btn" (click)="saveItem()">
+          {{ isEditingItem ? 'Save Changes' : 'Add Item' }}
+        </button>
       </div>
     </div>
   </div>
-</div>
 
 <div class="toast" *ngIf="showToast">
   {{ toastMessage }}

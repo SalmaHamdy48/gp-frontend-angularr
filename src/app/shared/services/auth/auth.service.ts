@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';  
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/app/enviroments/enviroment';
 
@@ -18,6 +18,7 @@ export class AuthService {
     const stored = localStorage.getItem('currentUser');
     if (stored) {
       this._currentUser.next(JSON.parse(stored));
+      this.initUploadSession();
     }
   }
 
@@ -33,8 +34,12 @@ export class AuthService {
 }
 
   getCurrentUser(): Observable<any> {
-  return this.http.get<any>(`${this.apiUrl}auth/me`);
-}
+    const user = this.currentUser;
+    if (!user?.id) {
+      return throwError(() => ({ status: 401, message: 'Not logged in' }));
+    }
+    return of(user);
+  }
 login(credentials: any): Observable<any> {
   return this.http.post<any>(`${this.apiUrl}auth/login`, credentials).pipe(
     tap(res => {
@@ -47,9 +52,27 @@ login(credentials: any): Observable<any> {
 
       this._currentUser.next(userData);
       localStorage.setItem('currentUser', JSON.stringify(userData));
+      this.clearUploadSessionForUser(userData.id);
+      sessionStorage.setItem('uploadSessionActive', '1');
     })
   );
 }
+
+  private initUploadSession(): void {
+    const user = this.currentUser;
+    if (!user?.id || sessionStorage.getItem('uploadSessionActive')) {
+      return;
+    }
+
+    this.clearUploadSessionForUser(user.id);
+    sessionStorage.setItem('uploadSessionActive', '1');
+  }
+
+  private clearUploadSessionForUser(userId: string): void {
+    this.http.delete(`${this.apiUrl}uploads/session`, {
+      params: { user_id: userId }
+    }).subscribe();
+  }
 getUserById(userId: string): Observable<any> {
   return this.http.get(`${this.apiUrl}/user/${userId}`);
 }
@@ -59,6 +82,17 @@ getUserById(userId: string): Observable<any> {
   }
 
  logout(): Observable<any> {
+  const user = this.currentUser;
+
+  if (user?.id) {
+    this.http.delete(
+      `${this.apiUrl}uploads/session`,
+      {
+        params: { user_id: user.id }
+      }
+    ).subscribe();
+  }
+
   return this.http.post(`${this.apiUrl}auth/logout`, {}).pipe(
     tap(() => {
       this.clearSession();

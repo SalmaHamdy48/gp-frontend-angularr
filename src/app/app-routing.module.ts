@@ -9,15 +9,16 @@ import { RecommendationComponent } from './pages/recommendation/recommendation.c
 import { HomeComponent } from './home/home.component';
 import { VirtualTryOnComponent } from './pages/virtual-try-on/virtual-try-on.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
+import { AuthGuard } from './core/guards/auth.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'signup', component: SignupComponent },
-  {path: 'home', component: HomePageComponent },
-  { path: 'profile', component: ProfileComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'recommendation', component: RecommendationComponent },
-  { path: 'vto', component: VirtualTryOnComponent }
+  { path: 'home', component: HomePageComponent, canActivate: [AuthGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'recommendation', component: RecommendationComponent, canActivate: [AuthGuard] },
+  { path: 'vto', component: VirtualTryOnComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

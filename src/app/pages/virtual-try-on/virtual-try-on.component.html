@@ -2,33 +2,13 @@
 
   <h1>Virtual Try-On </h1>
   <p class="subtitle">
-    See how clothes look on you with AI-powered visualization 
+    See how clothes look on you with AI-powered visualization
   </p>
 
-  <!-- TABS -->
-  <div class="tabs-container">
-    <button 
-      [class.active]="activeTab === 'upload'"
-      (click)="activeTab='upload'">
-      Upload Item
-    </button>
-
-    <!-- <button
-      [class.active]="activeTab === 'closet'"
-      (click)="loadCloset(); activeTab='closet'">
-      Use My Closet
-    </button> -->
-  </div>
-
-
-  <!-- ===================== -->
-  <!-- UPLOAD TAB -->
-  <!-- ===================== -->
   <div class="upload-card">
 
-    <div *ngIf="activeTab === 'upload'" class="upload-box">
+    <div class="upload-box">
 
-      <!-- 1. PERSON IMAGE -->
       <p class="upload-text">Upload Your Photo</p>
 
       <div class="drop-area" (click)="profileInput.click()">
@@ -45,14 +25,10 @@
                (change)="onProfileUpload($event)">
       </div>
 
-
-      <!-- 2. TYPE -->
       <div class="item-type" style="margin-top: 20px;">
-
         <p class="upload-text">Select Item Type</p>
 
         <div class="type-options">
-
           <div class="type-btn"
                [class.active]="selectedCategory === 'dress'"
                (click)="selectedCategory = 'dress'">
@@ -72,22 +48,18 @@
           </div>
 
           <div class="type-btn"
-               [class.active]="selectedCategory === 'bags'"
-               (click)="selectedCategory = 'bags'">
-            👟 Bags
+               [class.active]="selectedCategory === 'shoes'"
+               (click)="selectedCategory = 'shoes'">
+            👟 Shoes
           </div>
-
         </div>
       </div>
 
-
-      <!-- 3. CLOTHING ITEM -->
       <p class="upload-text" style="margin-top: 20px;">
-         Upload Clothing Item
+        Upload Clothing Item
       </p>
 
       <div class="drop-area" (click)="itemInput.click()">
-
         <ng-container *ngIf="itemPreview; else noItem">
           <img [src]="itemPreview" class="preview">
         </ng-container>
@@ -103,140 +75,47 @@
 
     </div>
 
+    <div class="result-card" *ngIf="showResult">
+      <p class="result-title">Virtual Try-On Result </p>
+      <p class="result-des">Here's how the outfit looks on you!</p>
 
-    <!-- ===================== -->
-<!-- CLOSET TAB -->
-<!-- ===================== -->
-<div *ngIf="activeTab === 'closet'" class="closet-section">
-
-  <!-- 1. PERSON IMAGE -->
-  <p class="upload-text"> Upload Your Photo</p>
-
-  <div class="drop-area" (click)="profileInput.click()">
-
-    <ng-container *ngIf="profilePreview; else noProfile">
-      <img [src]="profilePreview" class="preview">
-    </ng-container>
-
-    <ng-template #noProfile>
-      <p>No picture found</p>
-      <button class="upload-btn">Upload Photo</button>
-    </ng-template>
-
-    <input type="file" hidden #profileInput accept="image/*"
-           (change)="onProfileUpload($event)">
-  </div>
-
-
-  <!-- 2. TYPE -->
-  <p class="upload-text" style="margin-top: 20px;">
-     Select Item Type
-  </p>
-
-  <div class="type-options">
-
-    <div class="type-btn"
-         [class.active]="selectedCategory === 'dress'"
-         (click)="selectedCategory = 'dress'">
-      👗 Dress
-    </div>
-
-    <div class="type-btn"
-         [class.active]="selectedCategory === 'top'"
-         (click)="selectedCategory = 'top'">
-      👚 Top
-    </div>
-
-    <div class="type-btn"
-         [class.active]="selectedCategory === 'bottom'"
-         (click)="selectedCategory = 'bottom'">
-      👖 Bottom
-    </div>
-
-    <div class="type-btn"
-         [class.active]="selectedCategory === 'bags'"
-         (click)="selectedCategory = 'bags'">
-      👜 Bags
-    </div>
-
-  </div>
-
-
-  <!-- 3. CLOSET ITEMS (FILTERED) -->
-  <p class="upload-text" style="margin-top: 20px;">
-     Select Item From Closet
-  </p>
-
-  <div class="items-grid" *ngIf="filteredClosetItems.length > 0">
-
-    <div class="item-card"
-         *ngFor="let item of filteredClosetItems"
-         (click)="selectClosetItem(item)"
-         [class.selected]="selectedClosetItem === item">
-
-      <img [src]="item.image" />
-      <p>{{ item.name }}</p>
-
-    </div>
-
-  </div>
-
-  <div *ngIf="filteredClosetItems.length === 0">
-  <p>No items in this category</p>
-</div>
-
-</div>
-
-
-  <!-- TRY BUTTON -->
-  
-
-
-  <!-- RESULT -->
-  <div class="result-card" *ngIf="showResult">
-
-    <p class="result-title">Virtual Try-On Result </p>
-    <p class="result-des">Here's how the outfit looks on you!</p>
-
-    <div class="result-images">
-
-      <div class="your-photo">
-        <p>Your Photo</p>
-        <img [src]="profilePreview" class="preview">
-      </div>
-
-      <div class="with-item">
-        <p>With Clothing Item</p>
-
-        <div class="overlay">
-          <img *ngIf="resultImage"
-               [src]="resultImage"
-               class="preview small-item">
-
-          <p *ngIf="!resultImage" class="pending-text">
-            Processing AI result...
-          </p>
+      <div class="result-images">
+        <div class="your-photo">
+          <p>Your Photo</p>
+          <img [src]="profilePreview" class="preview">
         </div>
 
+        <div class="with-item">
+          <p>With Clothing Item</p>
+
+          <div class="overlay">
+            <img *ngIf="resultImage"
+                 [src]="resultImage"
+                 class="preview small-item">
+
+            <p *ngIf="!resultImage" class="pending-text">
+              Processing AI result...
+            </p>
+          </div>
+        </div>
       </div>
 
+      <button class="try-btn-footer" (click)="showResult=false">
+        Try Another Outfit
+      </button>
     </div>
-
-    <button class="try-btn-footer" (click)="showResult=false">
-      Try Another Outfit
-    </button>
 
   </div>
 
-  
-
-</div>
-<button class="try-btn"
+  <button class="try-btn"
     [disabled]="
+      loadingVton ||
       !profilePreview ||
-      (activeTab === 'upload' && (!itemPreview || !selectedCategory)) ||
-      (activeTab === 'closet' && !selectedClosetItem)
+      !itemPreview ||
+      !selectedCategory
     "
     (click)="tryItOn()">
-    Try It On
+    {{ loadingVton ? 'Processing (may take 8-10 min)...' : 'Try It On' }}
   </button>
+
+</div>
