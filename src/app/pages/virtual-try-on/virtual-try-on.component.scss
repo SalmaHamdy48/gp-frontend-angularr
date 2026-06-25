@@ -162,17 +162,19 @@ h1{
 
 
 .drop-area {
-  border: 2px dashed #ccc;
+  border: 2px dashed #f3b3c8;
   border-radius: 10px;
   padding: 25px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.3s, background-color 0.3s;
+  transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .drop-area:hover {
-  border-color: #ff7bac;
-  background-color: #fff0f5;
+  border-color: #f5a3c7;
+  background-color: #fff5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 163, 199, 0.25);
 }
 
 .preview {
@@ -203,8 +205,9 @@ h1{
 }
 
 .upload-btn:hover {
-  background-color: #ff7bac; 
-  transform: translateY(-2px); 
+  background-color: #e889b5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 163, 199, 0.35);
 }
 
 .upload-btn:active {
@@ -215,15 +218,33 @@ h1{
  align-items: center;
 }
 
-.try-btn{
+.try-btn {
   background: #F5A3C7;
-  border:none;
-  padding:12px 30px;
-  border-radius:10px;
-  cursor:pointer;
-  display:block;
-  margin:20px auto;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: block;
+  margin: 20px auto;
   color: #FFFFFF;
+}
+
+.try-btn:hover {
+  background-color: #e889b5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 163, 199, 0.35);
+}
+
+.try-btn:hover:not(:disabled) {
+  background: #e889b5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 163, 199, 0.35);
+}
+
+.try-btn-footer:hover {
+  background: #ffe9f2;
+  color: #e889b5;
+  transform: translateY(-2px);
 }
 
 .try-btn:disabled{

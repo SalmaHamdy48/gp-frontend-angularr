@@ -5,6 +5,12 @@ import {
   ClosetItem
 } from 'src/app/shared/services/recommendation/recommendation.service';
 import { environment } from 'src/app/enviroments/enviroment';
+import {
+  bucketLabel,
+  bucketToApiCategory,
+  ClothingBucket,
+  resolveClothingBucket
+} from 'src/app/shared/utils/clothing-category.util';
 
 interface DisplayItem {
   id?: number;
@@ -47,6 +53,8 @@ export class RecommendationComponent implements OnInit {
 
   showAddItemModal = false;
   editingItemId: number | null = null;
+  editingPublicId: string | null = null;
+  editingSource: 'upload' | 'closet' = 'upload';
   selectedImage = '';
   showToast = false;
   toastMessage = '';
@@ -86,6 +94,8 @@ export class RecommendationComponent implements OnInit {
 
     if (tab === 'upload') {
       this.loadUploads();
+    } else {
+      this.loadCloset();
     }
   }
 
@@ -94,13 +104,13 @@ export class RecommendationComponent implements OnInit {
       next: (response) => {
         this.uploads = response.items.filter(item => item.source === 'upload');
         this.tops = this.uploads
-          .filter(x => x.category === 'top')
+          .filter(x => resolveClothingBucket(x.category, x.subtype) === 'top')
           .map(item => this.toDisplayItem(item));
         this.bottoms = this.uploads
-          .filter(x => x.category === 'bottom')
+          .filter(x => resolveClothingBucket(x.category, x.subtype) === 'bottom')
           .map(item => this.toDisplayItem(item));
         this.shoes = this.uploads
-          .filter(x => x.category === 'foot')
+          .filter(x => resolveClothingBucket(x.category, x.subtype) === 'foot')
           .map(item => this.toDisplayItem(item));
       },
       error: err => console.error(err)
@@ -111,24 +121,46 @@ export class RecommendationComponent implements OnInit {
     this.recommendationService.getClosetItems(this.userId).subscribe({
       next: (response) => {
         this.closetItems = response.items;
-        this.closetTops = this.closetItems
-          .filter(x => (x.category || '').toLowerCase().includes('top'))
-          .map(item => this.toClosetDisplayItem(item));
-        this.closetBottoms = this.closetItems
-          .filter(x => (x.category || '').toLowerCase().includes('bottom'))
-          .map(item => this.toClosetDisplayItem(item));
-        this.closetShoes = this.closetItems
-          .filter(x => {
-            const cat = (x.category || '').toLowerCase();
-            return !cat.includes('top') && !cat.includes('bottom');
-          })
-          .map(item => this.toClosetDisplayItem(item));
+
+        this.recommendationService.getUploads(this.userId).subscribe({
+          next: (uploadResponse) => {
+            const closetUploads = uploadResponse.items.filter(
+              item => item.source === 'closet'
+            );
+            this.categorizeClosetItems(closetUploads);
+          },
+          error: (err) => {
+            this.categorizeClosetItems([]);
+            console.error(err);
+          }
+        });
       },
       error: err => console.error(err)
     });
   }
 
-  onImageSelected(event: Event): void {
+  private categorizeClosetItems(closetUploads: UploadItem[]): void {
+    const uploadByPublicId = new Map<string, UploadItem>();
+
+    closetUploads.forEach((upload) => {
+      const publicId = this.resolveUploadPublicId(upload);
+      if (publicId) {
+        uploadByPublicId.set(publicId, upload);
+      }
+    });
+
+    this.closetTops = this.closetItems
+      .filter(x => resolveClothingBucket(x.category, x.subtype) === 'top')
+      .map(item => this.toClosetDisplayItem(item, uploadByPublicId.get(item.public_id)));
+    this.closetBottoms = this.closetItems
+      .filter(x => resolveClothingBucket(x.category, x.subtype) === 'bottom')
+      .map(item => this.toClosetDisplayItem(item, uploadByPublicId.get(item.public_id)));
+    this.closetShoes = this.closetItems
+      .filter(x => resolveClothingBucket(x.category, x.subtype) === 'foot')
+      .map(item => this.toClosetDisplayItem(item, uploadByPublicId.get(item.public_id)));
+  }
+
+  onImageSelected(event: Event, slot: ClothingBucket): void {
     const input = event.target as HTMLInputElement;
     const files = input.files;
 
@@ -140,12 +172,38 @@ export class RecommendationComponent implements OnInit {
       this.recommendationService
         .addUploadItem(this.userId, 'upload', file)
         .subscribe({
-          next: () => this.loadUploads(),
+          next: (created) => this.handleUploadedItem(created, slot),
           error: err => console.error(err)
         });
     });
 
     input.value = '';
+  }
+
+  private handleUploadedItem(created: UploadItem, slot: ClothingBucket): void {
+    const detectedBucket = resolveClothingBucket(created.category, created.subtype);
+
+    if (detectedBucket === slot) {
+      this.loadUploads();
+      return;
+    }
+
+    this.recommendationService
+      .updateUploadItem(this.userId, created.id, {
+        category: bucketToApiCategory(detectedBucket)
+      })
+      .subscribe({
+        next: () => {
+          this.showToastMessage(
+            `This looks like ${bucketLabel(detectedBucket)}, so it was moved to the correct section.`
+          );
+          this.loadUploads();
+        },
+        error: (err) => {
+          console.error(err);
+          this.loadUploads();
+        }
+      });
   }
 
   getRecommendation(): void {
@@ -199,11 +257,33 @@ export class RecommendationComponent implements OnInit {
       });
   }
 
+  editClosetItem(item: DisplayItem): void {
+    if (!item.public_id) {
+      return;
+    }
+
+    this.editingSource = 'closet';
+    this.editingItemId = item.id ?? null;
+    this.editingPublicId = item.public_id;
+    this.selectedImage = item.image;
+    this.newItem = {
+      name: item.name || '',
+      type: item.type || '',
+      color: item.color || '',
+      gender: item.gender || '',
+      season: item.season || '',
+      occasion: this.mapUsageToOccasion(item.usage)
+    };
+    this.showAddItemModal = true;
+  }
+
   editItem(item: DisplayItem): void {
     if (!item.id) {
       return;
     }
 
+    this.editingSource = 'upload';
+    this.editingPublicId = null;
     this.editingItemId = item.id;
     this.selectedImage = item.image;
     this.newItem = {
@@ -218,10 +298,102 @@ export class RecommendationComponent implements OnInit {
   }
 
   saveItem(): void {
+    if (this.editingSource === 'closet') {
+      this.saveClosetItem();
+      return;
+    }
+
     if (!this.editingItemId) {
       return;
     }
 
+    const payload = this.buildItemUpdatePayload();
+
+    this.recommendationService
+      .updateUploadItem(this.userId, this.editingItemId, payload)
+      .subscribe({
+        next: () => {
+          this.showToastMessage('Item updated successfully');
+          this.closeAddItem();
+          this.loadUploads();
+        },
+        error: (err) => {
+          console.error(err);
+          this.showToastMessage('Failed to update item');
+        }
+      });
+  }
+
+  private saveClosetItem(): void {
+    if (!this.editingPublicId) {
+      return;
+    }
+
+    const payload = this.buildItemUpdatePayload();
+
+    const applyUpdate = (itemId: number) => {
+      this.recommendationService
+        .updateUploadItem(this.userId, itemId, payload)
+        .subscribe({
+          next: () => {
+            this.showToastMessage('Item updated successfully');
+            this.closeAddItem();
+            this.loadCloset();
+          },
+          error: (err) => {
+            console.error(err);
+            this.showToastMessage('Failed to update item');
+          }
+        });
+    };
+
+    if (this.editingItemId) {
+      applyUpdate(this.editingItemId);
+      return;
+    }
+
+    this.recommendationService
+      .addUploadItem(this.userId, 'closet', undefined, this.editingPublicId)
+      .subscribe({
+        next: (created) => applyUpdate(created.id),
+        error: (err) => {
+          console.error(err);
+          this.showToastMessage('Failed to update item');
+        }
+      });
+  }
+
+  closeAddItem(): void {
+    this.showAddItemModal = false;
+    this.editingItemId = null;
+    this.editingPublicId = null;
+    this.editingSource = 'upload';
+    this.selectedImage = '';
+    this.newItem = {
+      name: '',
+      type: '',
+      color: '',
+      gender: '',
+      season: '',
+      occasion: ''
+    };
+  }
+
+  addItem(): void {
+    this.saveItem();
+  }
+
+  get isEditingItem(): boolean {
+    return this.editingItemId !== null || this.editingPublicId !== null;
+  }
+
+  private buildItemUpdatePayload(): {
+    type?: string;
+    color?: string;
+    gender?: string;
+    season?: string;
+    usage?: string;
+  } {
     const payload: {
       type?: string;
       color?: string;
@@ -248,41 +420,11 @@ export class RecommendationComponent implements OnInit {
       payload.usage = usage;
     }
 
-    this.recommendationService
-      .updateUploadItem(this.userId, this.editingItemId, payload)
-      .subscribe({
-        next: () => {
-          this.showToastMessage('Item updated successfully');
-          this.closeAddItem();
-          this.loadUploads();
-        },
-        error: (err) => {
-          console.error(err);
-          this.showToastMessage('Failed to update item');
-        }
-      });
+    return payload;
   }
 
-  closeAddItem(): void {
-    this.showAddItemModal = false;
-    this.editingItemId = null;
-    this.selectedImage = '';
-    this.newItem = {
-      name: '',
-      type: '',
-      color: '',
-      gender: '',
-      season: '',
-      occasion: ''
-    };
-  }
-
-  addItem(): void {
-    this.saveItem();
-  }
-
-  get isEditingItem(): boolean {
-    return this.editingItemId !== null;
+  private resolveUploadPublicId(upload: UploadItem): string {
+    return upload.cloudinary_public_id || (upload as UploadItem & { public_id?: string }).public_id || '';
   }
 
   private mapOccasionToUsage(occasion: string): string | undefined {
@@ -336,16 +478,18 @@ export class RecommendationComponent implements OnInit {
     };
   }
 
-  private toClosetDisplayItem(item: ClosetItem): DisplayItem {
+  private toClosetDisplayItem(item: ClosetItem, upload?: UploadItem): DisplayItem {
     return {
+      id: upload?.id,
       public_id: item.public_id,
       image: item.url,
-      name: item.subtype || item.category || 'Item',
-      type: item.subtype || item.category || '',
-      color: item.color,
-      gender: item.gender,
-      season: item.season,
-      category: item.category
+      name: upload?.subtype || item.subtype || item.category || 'Item',
+      type: upload?.subtype || item.subtype || item.category || '',
+      color: upload?.color || item.color,
+      gender: upload?.gender || item.gender,
+      season: upload?.season || item.season,
+      usage: upload?.usage || item.usage,
+      category: upload?.category || item.category
     };
   }
 

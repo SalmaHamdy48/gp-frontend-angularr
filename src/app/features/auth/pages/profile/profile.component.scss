@@ -155,6 +155,13 @@
   padding: 8px;
   border-radius: 12px;
   cursor: pointer;
+  color: #4a2c3b;
+  font-weight: 500;
+}
+
+.tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.65);
+  color: #e889b5;
 }
 
 .tab.active {
@@ -508,7 +515,10 @@ color: #4A2C3B;
 
 .add-item-card:hover {
   background: #fff5f9;
-  transform: translateY(-3px);
+  border-color: #e889b5;
+  color: #e889b5;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(245, 163, 199, 0.28);
 }
 
 .item-info {

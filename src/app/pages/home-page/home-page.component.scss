@@ -61,9 +61,29 @@ h1{
   border-radius: 25px;
   border: none;
   cursor: pointer;
+  font-weight: 500;
 }
-.primary-btn { background-color: #F5A3C7; color: white; }
-.secondary-btn { background-color: #F5A3C733; }
+
+.primary-btn {
+  background-color: #F5A3C7;
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: #e889b5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 163, 199, 0.4);
+}
+
+.secondary-btn {
+  background-color: #F5A3C733;
+  color: #4A2C3B;
+}
+
+.secondary-btn:hover {
+  background-color: #ffe9f2;
+  transform: translateY(-2px);
+}
 
 /* Features */
 .features {
@@ -80,6 +100,24 @@ h1{
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+.feature-card-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.feature-card-link:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(245, 163, 199, 0.35);
+  background: #fff5f9;
+  border-color: #f5a3c7;
+}
+
+.feature-card-link:hover h3 {
+  color: #e889b5;
 }
 .feature-icon{
    width: 40px;           /* حجم مناسب للأيقونة */

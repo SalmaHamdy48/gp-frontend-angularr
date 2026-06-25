@@ -142,6 +142,12 @@
   font-weight: 500;
   font-size: 16px;
   color: #4a2c3b;
+  border-radius: 20px;
+}
+
+.tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.65);
+  color: #e889b5;
 }
 
 .tab.active {
@@ -183,8 +189,12 @@
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+}
 
-  // width: 30%;
+.pink-btn:hover {
+  background: #e889b5;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 163, 199, 0.35);
 }
 
 /* ================= Upload Grid ================= */
@@ -211,6 +221,15 @@
   justify-content: center;
   color: #f5a3c7;
   cursor: pointer;
+  background: #fff;
+}
+
+.upload-box:hover {
+  background: #fff5f9;
+  border-color: #f5a3c7;
+  color: #e889b5;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(245, 163, 199, 0.28);
 }
 
 .items-row {

@@ -15,10 +15,10 @@ const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'home', component: HomePageComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'recommendation', component: RecommendationComponent, canActivate: [AuthGuard] },
-  { path: 'vto', component: VirtualTryOnComponent, canActivate: [AuthGuard] }
+  { path: 'home', component: HomePageComponent, canActivate:[AuthGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate:[AuthGuard] },
+  { path: 'recommendation', component: RecommendationComponent, canActivate:[AuthGuard] },
+  { path: 'vto', component: VirtualTryOnComponent, canActivate:[AuthGuard] }
 ];
 
 @NgModule({

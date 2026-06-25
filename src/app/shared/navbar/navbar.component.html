@@ -2,7 +2,13 @@
   <div class="navbar-container">
     <div class="left-menu">
       <!-- Logo -->
-      <div class="logo" routerLink="/">FitFusion ✨</div>
+      <a class="logo" routerLink="/home">
+        <img
+          src="assets/images/fitfusion-logo.png"
+          alt="Fit Fusion"
+          class="logo-image"
+        />
+      </a>
 
       <!-- Tabs -->
       <div class="nav-links" *ngIf="!isLoginPage">

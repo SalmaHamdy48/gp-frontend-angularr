@@ -6,6 +6,11 @@ import {
   ElementRef
 } from '@angular/core';
 import { ProfileService } from 'src/app/shared/services/profile/profile.service';
+import {
+  bucketLabel,
+  profileTypeToBucket,
+  resolveClothingBucket
+} from 'src/app/shared/utils/clothing-category.util';
 
 
 @Component({
@@ -87,7 +92,7 @@ export class ProfileComponent implements OnInit {
     this.profileInput?.nativeElement?.click();
   }
   uploadClosetItem() {
-  
+
   this.profileService
     .uploadClosetItem(
       this.currentUser.id,
@@ -95,35 +100,18 @@ export class ProfileComponent implements OnInit {
     )
     .subscribe({
       next: (res: any) => {
-        console.log('Upload Response:', res);
+        const detectedBucket = resolveClothingBucket(res.category, res.subtype);
+        const selectedBucket = profileTypeToBucket(this.selectedClosetType);
 
-        const item = {
-          imageUrl: res.url,
-          name: res.subtype || res.category,
-          public_id: res.public_id
-        };
-
-        const category =
-          (res.category || '').toLowerCase();
-
-        if (
-          category.includes('top')
-        ) {
-
-          this.tops.push(item);
-
-        } else if (
-          category.includes('bottom')
-        ) {
-
-          this.bottoms.push(item);
-
+        if (detectedBucket !== selectedBucket) {
+          alert(
+            `This looks like ${bucketLabel(detectedBucket)}, so it was added to the ${bucketLabel(detectedBucket)} section.`
+          );
         } else {
-
-          this.shoes.push(item);
+          alert('Item added successfully');
         }
 
-        alert('Item added successfully');
+        this.loadCloset();
       },
       error: (err) => {
         console.error(err);
@@ -216,28 +204,19 @@ onClosetItemSelected(event: any) {
         this.shoes = [];
 
         res.items.forEach((item: any) => {
-
-          const category =
-            (item.category || '').toLowerCase();
-
           const closetItem = {
             imageUrl: item.url,
             name: item.subtype || item.category,
             public_id: item.public_id
           };
 
-          if (category.includes('top')) {
+          const bucket = resolveClothingBucket(item.category, item.subtype);
 
+          if (bucket === 'top') {
             this.tops.push(closetItem);
-
-          } else if (
-            category.includes('bottom')
-          ) {
-
+          } else if (bucket === 'bottom') {
             this.bottoms.push(closetItem);
-
           } else {
-
             this.shoes.push(closetItem);
           }
         });

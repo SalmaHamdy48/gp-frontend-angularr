@@ -41,6 +41,9 @@
             <div class="item-card" *ngFor="let item of closetTops">
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
+                <div class="card-actions">
+                  <span class="edit" (click)="editClosetItem(item)">✏</span>
+                </div>
               </div>
               <div class="item-details">
                 <div class="item-title">{{ item.name }}</div>
@@ -61,6 +64,9 @@
             <div class="item-card" *ngFor="let item of closetBottoms">
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
+                <div class="card-actions">
+                  <span class="edit" (click)="editClosetItem(item)">✏</span>
+                </div>
               </div>
               <div class="item-details">
                 <div class="item-title">{{ item.name }}</div>
@@ -81,6 +87,9 @@
             <div class="item-card" *ngFor="let item of closetShoes">
               <div class="item-image">
                 <img [src]="item.image" [alt]="item.name" />
+                <div class="card-actions">
+                  <span class="edit" (click)="editClosetItem(item)">✏</span>
+                </div>
               </div>
               <div class="item-details">
                 <div class="item-title">{{ item.name }}</div>
@@ -135,7 +144,7 @@
                 #topInput
                 accept="image/*"
                 multiple
-                (change)="onImageSelected($event)"
+                (change)="onImageSelected($event, 'top')"
               />
               <span>Add Top</span>
             </div>
@@ -172,7 +181,7 @@
                 #bottomInput
                 accept="image/*"
                 multiple
-                (change)="onImageSelected($event)"
+                (change)="onImageSelected($event, 'bottom')"
               />
               <span>Add Bottom</span>
             </div>
@@ -209,7 +218,7 @@
                 #shoeInput
                 accept="image/*"
                 multiple
-                (change)="onImageSelected($event)"
+                (change)="onImageSelected($event, 'foot')"
               />
               <span>Add Shoes</span>
             </div>
